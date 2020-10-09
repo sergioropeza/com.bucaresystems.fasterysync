@@ -5,19 +5,19 @@ import org.compiere.util.DB;
 public class Products_value{
 
 	public static final String Table_Name = "products_value";
-	private Object id;
-	private Object product;
-	private Object value;
-	private Object isactive;
-	private Object ismastervalue;
-	private Object isplucode;
-	private Object isdefault;
-	private Object isdefaultvalue;
-	private Object node_id;
-	private Object idempiere_id;
-	private Object ad_org_id;
-	private Object m_product_id;
-	private Object qty;
+	protected Object id;
+	protected Object product;
+	protected Object value;
+	protected Object isactive;
+	protected Object ismastervalue;
+	protected Object isplucode;
+	protected Object isdefault;
+	protected Object isdefaultvalue;
+	protected Object node_id;
+	protected Object idempiere_id;
+	protected Object ad_org_id;
+	protected Object m_product_id;
+	protected Object qty;
 	private String trxName;
 
 	public Products_value(String trxName){

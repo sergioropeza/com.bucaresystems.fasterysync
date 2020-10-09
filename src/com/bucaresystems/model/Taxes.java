@@ -2,18 +2,21 @@ package com.bucaresystems.model;
 
 import org.compiere.util.DB;
 
-public class Categories{
+public class Taxes{
 
-	public static final String Table_Name = "categories";
+	public static final String Table_Name = "taxes";
 	protected Object id;
 	protected Object name;
+	protected Object category;
+	protected Object rate;
+	protected Object parentid;
 	protected Object idempiere_id;
 	private String trxName;
 
-	public Categories(String trxName){
+	public Taxes(String trxName){
 		this.trxName = trxName;
 	}
-	public Categories(String trxName, Object idempiere_ID){
+	public Taxes(String trxName, Object idempiere_ID){
 		this(trxName);
 		this.idempiere_id = idempiere_ID;
 	}
@@ -29,6 +32,24 @@ public class Categories{
 	public void setName(Object name) {
 		this.name = name;
 	}
+	public Object getCategory() {
+		return category;
+	}
+	public void setCategory(Object category) {
+		this.category = category;
+	}
+	public Object getRate() {
+		return rate;
+	}
+	public void setRate(Object rate) {
+		this.rate = rate;
+	}
+	public Object getParentid() {
+		return parentid;
+	}
+	public void setParentid(Object parentid) {
+		this.parentid = parentid;
+	}
 	public Object getIdempiere_id() {
 		return idempiere_id;
 	}
@@ -37,22 +58,25 @@ public class Categories{
 	}
 	public void save(String whereClause) {
 
-		String sql ="Insert Into pos.categories(id,name,idempiere_id)"+
-		"(Select id,name,idempiere_id from pos.bsca_categories_v where 1=1 "+whereClause+")";
+		String sql ="Insert Into pos.taxes(id,name,category,rate,parentid,idempiere_id)"+
+		"(Select id,name,category,rate,parentid,idempiere_id from pos.bsca_taxes_v where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
 
-		String sql ="Update pos.categories a set "+
+		String sql ="Update pos.taxes a set "+
 		"id= b.id,"+
 		"name= b.name,"+
+		"category= b.category,"+
+		"rate= b.rate,"+
+		"parentid= b.parentid,"+
 		"idempiere_id= b.idempiere_id "+
-		"from pos.bsca_categories_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from pos.bsca_taxes_v b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {
 
-		String sql = "select idempiere_ID from pos.categories where idempiere_ID='"+idempiere_id+"'";
+		String sql = "select idempiere_ID from pos.taxes where idempiere_ID='"+idempiere_id+"'";
 		int l = DB.getSQLValueEx( trxName, sql);
 		return l>0;
 	}

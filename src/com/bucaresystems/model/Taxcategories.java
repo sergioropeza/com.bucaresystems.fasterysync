@@ -2,18 +2,18 @@ package com.bucaresystems.model;
 
 import org.compiere.util.DB;
 
-public class Categories{
+public class Taxcategories{
 
-	public static final String Table_Name = "categories";
+	public static final String Table_Name = "taxcategories";
 	protected Object id;
 	protected Object name;
 	protected Object idempiere_id;
 	private String trxName;
 
-	public Categories(String trxName){
+	public Taxcategories(String trxName){
 		this.trxName = trxName;
 	}
-	public Categories(String trxName, Object idempiere_ID){
+	public Taxcategories(String trxName, Object idempiere_ID){
 		this(trxName);
 		this.idempiere_id = idempiere_ID;
 	}
@@ -37,22 +37,22 @@ public class Categories{
 	}
 	public void save(String whereClause) {
 
-		String sql ="Insert Into pos.categories(id,name,idempiere_id)"+
-		"(Select id,name,idempiere_id from pos.bsca_categories_v where 1=1 "+whereClause+")";
+		String sql ="Insert Into pos.taxcategories(id,name,idempiere_id)"+
+		"(Select id,name,idempiere_id from pos.bsca_taxcategories_v where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
 
-		String sql ="Update pos.categories a set "+
+		String sql ="Update pos.taxcategories a set "+
 		"id= b.id,"+
 		"name= b.name,"+
 		"idempiere_id= b.idempiere_id "+
-		"from pos.bsca_categories_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from pos.bsca_taxcategories_v b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {
 
-		String sql = "select idempiere_ID from pos.categories where idempiere_ID='"+idempiere_id+"'";
+		String sql = "select idempiere_ID from pos.taxcategories where idempiere_ID='"+idempiere_id+"'";
 		int l = DB.getSQLValueEx( trxName, sql);
 		return l>0;
 	}
