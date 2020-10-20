@@ -13,5 +13,5 @@ CREATE TABLE pos.products_value (
 	idempiere_id numeric NULL,
 	qty numeric NOT NULL DEFAULT 1,
 	CONSTRAINT products_value_pkey PRIMARY KEY (id),
-	CONSTRAINT products_value_fk_1 FOREIGN KEY (product) REFERENCES products(id)
+	CONSTRAINT products_value_fk_1 FOREIGN KEY (product) REFERENCES pos.products(id)
 );

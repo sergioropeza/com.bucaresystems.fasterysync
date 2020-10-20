@@ -18,7 +18,7 @@ public class Products{
 	protected Object idempiere_id;
 	protected Object m_pricelist_version_id;
 	protected Object ad_org_id;
-	private String trxName;
+	protected String trxName;
 
 	public Products(String trxName){
 		this.trxName = trxName;
