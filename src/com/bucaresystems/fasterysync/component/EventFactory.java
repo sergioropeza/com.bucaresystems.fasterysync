@@ -19,6 +19,7 @@
 package com.bucaresystems.fasterysync.component;
 
 import org.adempiere.base.event.IEventTopics;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductCategory;
 import org.compiere.model.MProductPrice;
@@ -27,6 +28,7 @@ import org.compiere.model.MTaxCategory;
 import org.compiere.model.MUser;
 
 import com.bucaresystems.fasterysync.base.CustomEventFactory;
+import com.bucaresystems.fasterysync.event.BSCA_ECurrency;
 import com.bucaresystems.fasterysync.event.BSCA_EProduct;
 import com.bucaresystems.fasterysync.event.BSCA_EProductCategory;
 import com.bucaresystems.fasterysync.event.BSCA_EProductOrg;
@@ -71,6 +73,9 @@ public class EventFactory extends CustomEventFactory {
 		registerEvent(IEventTopics.PO_BEFORE_DELETE, "BSCA_ProductOrg", BSCA_EProductOrg.class);
 		registerEvent(IEventTopics.PO_AFTER_CHANGE, MProductPrice.Table_Name,BSCA_EProductPrice.class);	
 		registerEvent(IEventTopics.PO_AFTER_NEW, MProductPrice.Table_Name,BSCA_EProductPrice.class);
+		registerEvent(IEventTopics.PO_AFTER_CHANGE, MCurrency.Table_Name, BSCA_ECurrency.class);	
+		registerEvent(IEventTopics.PO_AFTER_NEW, MCurrency.Table_Name,BSCA_ECurrency.class);
+		
 	}
 
 }

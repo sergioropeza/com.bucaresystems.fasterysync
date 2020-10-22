@@ -15,7 +15,7 @@ public class BSCA_EProduct extends CustomEvent{
 	@Override
 	protected void doHandleEvent() {
 		String trxName = getPO().get_TrxName();
-		int M_Product_ID = getPO().get_ValueAsInt("M_Product_ID");		
+		int M_Product_ID = getPO().get_ID();		
 		
 		if (getEventType().equals(IEventTopics.PO_AFTER_NEW)|| getEventType().equals(IEventTopics.PO_AFTER_CHANGE)){
 			List<PO> lstProductOrg = new Query(Env.getCtx(), "BSCA_ProductOrg", "M_Product_ID= ?", trxName).
