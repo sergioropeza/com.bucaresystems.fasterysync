@@ -14,6 +14,8 @@ This project synchronize idempiere with Fastery Caja
     - Products_value
     - Roles
     - BSCA_Currency
+    - Bsca_Postendertype
+  
   
   * Fastery->Idempiere:
     - Customers
@@ -27,3 +29,4 @@ This project synchronize idempiere with Fastery Caja
 #### New idempiere windows:	
  - Roles POS
  - Usuario POS
+ - Tipo de Pago POS
