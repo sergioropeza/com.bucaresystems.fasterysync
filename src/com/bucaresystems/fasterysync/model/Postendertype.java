@@ -4,16 +4,16 @@ import org.compiere.util.DB;
 
 public class Postendertype{
 
-	public static final String Table_Name = "pos.bsca_postendertype";
-	protected Object id;
-	protected Object name;
-	protected Object bsca_currency_id;
-	protected Object isallowchange;
+	public static final String Table_Name = "postendertype";
+	protected Object idempiere_id;
 	protected Object issetdifference;
 	protected Object isactive;
+	protected Object id;
+	protected Object bsca_currency_id;
+	protected Object isallowchange;
+	protected Object name;
 	protected Object classname;
 	protected Object node_id;
-	protected Object idempiere_id;
 	protected String trxName;
 
 	public Postendertype(String trxName){
@@ -23,29 +23,11 @@ public class Postendertype{
 		this(trxName);
 		this.idempiere_id = idempiere_ID;
 	}
-	public Object getId() {
-		return id;
+	public Object getIdempiere_id() {
+		return idempiere_id;
 	}
-	public void setId(Object id) {
-		this.id = id;
-	}
-	public Object getName() {
-		return name;
-	}
-	public void setName(Object name) {
-		this.name = name;
-	}
-	public Object getBsca_currency_id() {
-		return bsca_currency_id;
-	}
-	public void setBsca_currency_id(Object bsca_currency_id) {
-		this.bsca_currency_id = bsca_currency_id;
-	}
-	public Object getIsallowchange() {
-		return isallowchange;
-	}
-	public void setIsallowchange(Object isallowchange) {
-		this.isallowchange = isallowchange;
+	public void setIdempiere_id(Object idempiere_id) {
+		this.idempiere_id = idempiere_id;
 	}
 	public Object getIssetdifference() {
 		return issetdifference;
@@ -59,6 +41,30 @@ public class Postendertype{
 	public void setIsactive(Object isactive) {
 		this.isactive = isactive;
 	}
+	public Object getId() {
+		return id;
+	}
+	public void setId(Object id) {
+		this.id = id;
+	}
+	public Object getBsca_currency_id() {
+		return bsca_currency_id;
+	}
+	public void setBsca_currency_id(Object bsca_currency_id) {
+		this.bsca_currency_id = bsca_currency_id;
+	}
+	public Object getIsallowchange() {
+		return isallowchange;
+	}
+	public void setIsallowchange(Object isallowchange) {
+		this.isallowchange = isallowchange;
+	}
+	public Object getName() {
+		return name;
+	}
+	public void setName(Object name) {
+		this.name = name;
+	}
 	public Object getClassname() {
 		return classname;
 	}
@@ -71,30 +77,24 @@ public class Postendertype{
 	public void setNode_id(Object node_id) {
 		this.node_id = node_id;
 	}
-	public Object getIdempiere_id() {
-		return idempiere_id;
-	}
-	public void setIdempiere_id(Object idempiere_id) {
-		this.idempiere_id = idempiere_id;
-	}
 	public void save(String whereClause) {
 
-		String sql ="Insert Into "+Table_Name+" (id,name,bsca_currency_id,isallowchange,issetdifference,isactive,classname,node_id,idempiere_id)"+
-		"(Select id,name,bsca_currency_id,isallowchange,issetdifference,isactive,classname,node_id,idempiere_id from pos.bsca_postendertype_v where 1=1 "+whereClause+")";
+		String sql ="Insert Into "+Table_Name+" (idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id)"+
+		"(Select idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id from pos.bsca_postendertype_v where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
 
 		String sql ="Update "+Table_Name+" a set "+
-		"id= b.id,"+
-		"name= b.name,"+
-		"bsca_currency_id= b.bsca_currency_id,"+
-		"isallowchange= b.isallowchange,"+
+		"idempiere_id= b.idempiere_id,"+
 		"issetdifference= b.issetdifference,"+
 		"isactive= b.isactive,"+
+		"id= b.id,"+
+		"bsca_currency_id= b.bsca_currency_id,"+
+		"isallowchange= b.isallowchange,"+
+		"name= b.name,"+
 		"classname= b.classname,"+
-		"node_id= b.node_id,"+
-		"idempiere_id= b.idempiere_id "+
+		"node_id= b.node_id "+
 		"from pos.bsca_postendertype_v b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};

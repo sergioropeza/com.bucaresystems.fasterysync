@@ -34,7 +34,7 @@ insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_tim
 insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
 				  values('roles','roles','users',current_timestamp,current_timestamp);
 insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('categories','products','products',current_timestamp,current_timestamp);
+				  values('categories','categories','products',current_timestamp,current_timestamp);
 insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
 				  values('products','products','products',current_timestamp,current_timestamp);
 insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
@@ -93,7 +93,7 @@ values('workstation_2_store', 'workstation', 'store', 'default',current_timestam
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('people','corp_2_store', 100, current_timestamp, current_timestamp);
+values('people','corp_2_one_store', 100, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
 values('people','store_2_workstation', 100, current_timestamp, current_timestamp);
@@ -114,14 +114,14 @@ values('categories','store_2_workstation', 100, current_timestamp, current_times
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('products','corp_2_store', 100, current_timestamp, current_timestamp);
+values('products','corp_2_one_store', 100, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
 values('products','store_2_workstation', 100, current_timestamp, current_timestamp);
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('products_value','corp_2_store', 100, current_timestamp, current_timestamp);
+values('products_value','corp_2_one_store', 100, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
 values('products_value','store_2_workstation', 100, current_timestamp, current_timestamp);

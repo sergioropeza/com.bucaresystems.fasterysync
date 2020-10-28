@@ -6,12 +6,12 @@ public class Taxes{
 
 	public static final String Table_Name = "taxes";
 	protected Object id;
-	protected Object name;
 	protected Object category;
 	protected Object rate;
 	protected Object parentid;
 	protected Object idempiere_id;
-	private String trxName;
+	protected Object name;
+	protected String trxName;
 
 	public Taxes(String trxName){
 		this.trxName = trxName;
@@ -25,12 +25,6 @@ public class Taxes{
 	}
 	public void setId(Object id) {
 		this.id = id;
-	}
-	public Object getName() {
-		return name;
-	}
-	public void setName(Object name) {
-		this.name = name;
 	}
 	public Object getCategory() {
 		return category;
@@ -56,27 +50,33 @@ public class Taxes{
 	public void setIdempiere_id(Object idempiere_id) {
 		this.idempiere_id = idempiere_id;
 	}
+	public Object getName() {
+		return name;
+	}
+	public void setName(Object name) {
+		this.name = name;
+	}
 	public void save(String whereClause) {
 
-		String sql ="Insert Into pos.taxes(id,name,category,rate,parentid,idempiere_id)"+
-		"(Select id,name,category,rate,parentid,idempiere_id from pos.bsca_taxes_v where 1=1 "+whereClause+")";
+		String sql ="Insert Into "+Table_Name+" (id,category,rate,parentid,idempiere_id,name)"+
+		"(Select id,category,rate,parentid,idempiere_id,name from pos.bsca_taxes_v where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
 
-		String sql ="Update pos.taxes a set "+
+		String sql ="Update "+Table_Name+" a set "+
 		"id= b.id,"+
-		"name= b.name,"+
 		"category= b.category,"+
 		"rate= b.rate,"+
 		"parentid= b.parentid,"+
-		"idempiere_id= b.idempiere_id "+
+		"idempiere_id= b.idempiere_id,"+
+		"name= b.name "+
 		"from pos.bsca_taxes_v b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {
 
-		String sql = "select idempiere_ID from pos.taxes where idempiere_ID='"+idempiere_id+"'";
+		String sql = "select idempiere_ID from "+Table_Name+" where idempiere_ID='"+idempiere_id+"'";
 		int l = DB.getSQLValueEx( trxName, sql);
 		return l>0;
 	}
