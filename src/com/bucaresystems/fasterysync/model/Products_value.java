@@ -108,7 +108,7 @@ public class Products_value{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (qty,isdefaultvalue,idempiere_id,ad_org_id,m_product_id,isactive,ismastervalue,isplucode,isdefault,product,value,id,node_id)"+
-		"(Select qty,isdefaultvalue,idempiere_id,ad_org_id,m_product_id,isactive,ismastervalue,isplucode,isdefault,product,value,id,node_id from pos.bsca_products_value_v where 1=1 "+whereClause+")";
+		"(Select qty,isdefaultvalue,idempiere_id,ad_org_id,m_product_id,isactive,ismastervalue,isplucode,isdefault,product,value,id,node_id from bsca_products_value_v where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -127,7 +127,7 @@ public class Products_value{
 		"value= b.value,"+
 		"id= b.id,"+
 		"node_id= b.node_id "+
-		"from pos.bsca_products_value_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from bsca_products_value_v b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {

@@ -66,7 +66,7 @@ public class People{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (role,ad_user_id,idempiere_id,id,node_id,name,apppassword)"+
-		"(Select role,ad_user_id,idempiere_id,id,node_id,name,apppassword from pos.bsca_people_v where 1=1 "+whereClause+")";
+		"(Select role,ad_user_id,idempiere_id,id,node_id,name,apppassword from bsca_people_v where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -79,7 +79,7 @@ public class People{
 		"node_id= b.node_id,"+
 		"name= b.name,"+
 		"apppassword= b.apppassword "+
-		"from pos.bsca_people_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from bsca_people_v b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {

@@ -18,13 +18,11 @@ package com.bucaresystems.fasterysync.model;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.I_C_Tax;
@@ -33,10 +31,7 @@ import org.compiere.model.MTax;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.model.Scriptlet;
-import org.compiere.util.CCache;
 import org.compiere.util.Env;
-import org.compiere.util.Msg;
-import org.compiere.util.TimeUtil;
 
 /**
  *  Tax Model

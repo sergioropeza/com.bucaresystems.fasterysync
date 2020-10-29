@@ -59,7 +59,7 @@ public class Taxes{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (id,category,rate,parentid,idempiere_id,name)"+
-		"(Select id,category,rate,parentid,idempiere_id,name from pos.bsca_taxes_v where 1=1 "+whereClause+")";
+		"(Select id,category,rate,parentid,idempiere_id,name from bsca_taxes_v where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -71,7 +71,7 @@ public class Taxes{
 		"parentid= b.parentid,"+
 		"idempiere_id= b.idempiere_id,"+
 		"name= b.name "+
-		"from pos.bsca_taxes_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from bsca_taxes_v b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {

@@ -34,7 +34,7 @@ public class BSCA_Products extends Products{
 	
 	private boolean isRegister() {
 
-		String sql = "select idempiere_ID from pos.products where idempiere_ID='"+idempiere_id+"' and AD_Org_ID = "+ad_org_id;
+		String sql = "select idempiere_ID from "+Table_Name+" where idempiere_ID='"+idempiere_id+"' and AD_Org_ID = "+ad_org_id;
 		int l = DB.getSQLValueEx( trxName, sql);
 		return l>0;
 	}

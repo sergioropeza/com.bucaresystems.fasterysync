@@ -20,14 +20,14 @@ public class BSCA_Products_Value extends Products_value{
 	
 	private boolean isRegister() {
 
-		String sql = "select idempiere_ID from pos.products_value where idempiere_ID='"+idempiere_id+"' and AD_Org_ID = "+ad_org_id;
+		String sql = "select idempiere_ID from products_value where idempiere_ID='"+idempiere_id+"' and AD_Org_ID = "+ad_org_id;
 		int l = DB.getSQLValueEx( trxName, sql);
 		return l>0;
 	}
 	
 	@Override
 	public void save(){
-		String sql = "select Count(idempiere_ID) from pos.Products where idempiere_ID='"+m_product_id+"' and AD_Org_ID = "+ad_org_id;
+		String sql = "select Count(idempiere_ID) from Products where idempiere_ID='"+m_product_id+"' and AD_Org_ID = "+ad_org_id;
 		int l = DB.getSQLValueEx( trxName, sql);
 		 
 		if (l==0)

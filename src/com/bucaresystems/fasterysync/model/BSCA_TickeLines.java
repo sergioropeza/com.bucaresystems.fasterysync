@@ -1,7 +1,5 @@
 package com.bucaresystems.fasterysync.model;
 
-import java.math.BigDecimal;
-
 public class BSCA_TickeLines {
 
 	  private String ticket;

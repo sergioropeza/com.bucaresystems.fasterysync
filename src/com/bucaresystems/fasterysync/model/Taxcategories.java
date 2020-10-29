@@ -38,7 +38,7 @@ public class Taxcategories{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (id,idempiere_id,name)"+
-		"(Select id,idempiere_id,name from pos.bsca_taxcategories_v where 1=1 "+whereClause+")";
+		"(Select id,idempiere_id,name from bsca_taxcategories_v where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -47,7 +47,7 @@ public class Taxcategories{
 		"id= b.id,"+
 		"idempiere_id= b.idempiere_id,"+
 		"name= b.name "+
-		"from pos.bsca_taxcategories_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from bsca_taxcategories_v b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {

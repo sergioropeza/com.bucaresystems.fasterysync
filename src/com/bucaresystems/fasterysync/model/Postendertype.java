@@ -80,7 +80,7 @@ public class Postendertype{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id)"+
-		"(Select idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id from pos.bsca_postendertype_v where 1=1 "+whereClause+")";
+		"(Select idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id from bsca_postendertype_v where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -95,7 +95,7 @@ public class Postendertype{
 		"name= b.name,"+
 		"classname= b.classname,"+
 		"node_id= b.node_id "+
-		"from pos.bsca_postendertype_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from bsca_postendertype_v b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {

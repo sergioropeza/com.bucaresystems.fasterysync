@@ -73,7 +73,7 @@ public class Currency{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (idempiere_id,multiplyrate,isactive,id,node_id,name,isocode,cursymbol)"+
-		"(Select idempiere_id,multiplyrate,isactive,id,node_id,name,isocode,cursymbol from pos.bsca_currency_v where 1=1 "+whereClause+")";
+		"(Select idempiere_id,multiplyrate,isactive,id,node_id,name,isocode,cursymbol from bsca_currency_v where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -87,7 +87,7 @@ public class Currency{
 		"name= b.name,"+
 		"isocode= b.isocode,"+
 		"cursymbol= b.cursymbol "+
-		"from pos.bsca_currency_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from bsca_currency_v b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {
