@@ -1,0 +1,35 @@
+CREATE TABLE customers (
+	id varchar(255) NOT NULL,
+	searchkey varchar(255) NOT NULL,
+	taxid varchar(255) NULL DEFAULT NULL::character varying,
+	"name" varchar(255) NOT NULL,
+	taxcategory varchar(255) NULL DEFAULT NULL::character varying,
+	card varchar(255) NULL DEFAULT NULL::character varying,
+	maxdebt float8 NOT NULL DEFAULT '0'::double precision,
+	address varchar(255) NULL DEFAULT NULL::character varying,
+	address2 varchar(255) NULL DEFAULT NULL::character varying,
+	postal varchar(255) NULL DEFAULT NULL::character varying,
+	city varchar(255) NULL DEFAULT NULL::character varying,
+	region varchar(255) NULL DEFAULT NULL::character varying,
+	country varchar(255) NULL DEFAULT NULL::character varying,
+	firstname varchar(255) NULL DEFAULT NULL::character varying,
+	lastname varchar(255) NULL DEFAULT NULL::character varying,
+	email varchar(255) NULL DEFAULT NULL::character varying,
+	phone varchar(255) NULL DEFAULT NULL::character varying,
+	phone2 varchar(255) NULL DEFAULT NULL::character varying,
+	fax varchar(255) NULL DEFAULT NULL::character varying,
+	notes varchar(255) NULL DEFAULT NULL::character varying,
+	visible bool NOT NULL DEFAULT true,
+	curdate timestamp NULL DEFAULT NULL::timestamp without time zone,
+	curdebt float8 NULL DEFAULT '0'::double precision,
+	image bytea NULL,
+	isvip bool NOT NULL DEFAULT false,
+	discount float8 NULL DEFAULT '0'::double precision,
+	memodate timestamp NULL DEFAULT '2000-01-01 00:00:01'::timestamp without time zone,
+	gender varchar(255) NULL DEFAULT NULL::character varying,
+	CONSTRAINT customers_skey_inx UNIQUE (searchkey),
+	CONSTRAINT pk_customers PRIMARY KEY (id)
+);
+CREATE INDEX customers_card_inx ON customers USING btree (card);
+CREATE INDEX customers_name_inx ON customers USING btree (name);
+CREATE INDEX customers_taxid_inx ON customers USING btree (taxid);
