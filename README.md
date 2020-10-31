@@ -13,7 +13,7 @@ This project synchronize idempiere with Fastery Caja
     - Products_value
     - Roles
     - BSCA_Currency
-    - Bsca_Postendertype
+    - BSCA_Postendertype
   
   
   * Fastery->Idempiere:
@@ -41,7 +41,7 @@ bin/sym
  - Tender Type POS
  
 
-####  Synchronization  Products: 
+#### Synchronization  Products: 
    - Register o Update Tax Categories
    - Register o Update Tax
    - Register o Update Product Categories

@@ -4,7 +4,7 @@ import org.compiere.util.DB;
 
 public class Postendertype{
 
-	public static final String Table_Name = "postendertype";
+	public static final String Table_Name = "bsca_postendertype";
 	protected Object idempiere_id;
 	protected Object issetdifference;
 	protected Object isactive;

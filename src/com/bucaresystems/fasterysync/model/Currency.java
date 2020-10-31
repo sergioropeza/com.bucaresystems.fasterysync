@@ -4,7 +4,7 @@ import org.compiere.util.DB;
 
 public class Currency{
 
-	public static final String Table_Name = "currency";
+	public static final String Table_Name = "bsca_currency";
 	protected Object idempiere_id;
 	protected Object multiplyrate;
 	protected Object isactive;

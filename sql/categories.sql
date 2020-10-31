@@ -1,4 +1,4 @@
-CREATE TABLE pos.categories (
+CREATE TABLE categories (
 	id varchar(255) NOT NULL,
 	"name" varchar(255) NOT NULL,
 	parentid varchar(255) NULL DEFAULT NULL::character varying,
@@ -10,5 +10,5 @@ CREATE TABLE pos.categories (
 	CONSTRAINT categories_pkey PRIMARY KEY (id),
 	CONSTRAINT categories_fk_1 FOREIGN KEY (parentid) REFERENCES categories(id)
 );
-CREATE UNIQUE INDEX categories_fk_1 ON pos.categories USING btree (parentid);
-CREATE UNIQUE INDEX categories_name_inx ON pos.categories USING btree (name);
+CREATE UNIQUE INDEX categories_fk_1 ON categories USING btree (parentid);
+CREATE UNIQUE INDEX categories_name_inx ON categories USING btree (name);

@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW pos.bsca_postendertype_v
+CREATE OR REPLACE VIEW bsca_postendertype_v
 AS SELECT p.c_postendertype_id AS id,
     p.name,
     p.c_currency_id AS bsca_currency_id,

@@ -1,0 +1,11 @@
+- Uninstall symmetricds on node
+	bin/symadmin uninstall --engine corp 
+	
+- Create symmetricds table on data base
+	bin/symadmin  --engine corp create-sym-tables
+
+- Run conf. script on data base 
+	bin/dbimport --engine corp $DIR_PLUGIN/com.bucaresystems.fasterysync/symmetricds-conf/conf.sql
+
+- Compare two symmetricds database 
+	./dbcompare TABLENAME -s ../engines/corp.properties -t ../engines/store.properties --output-sql diff.sql --use-sym-config true

@@ -1,0 +1,15 @@
+delete from bsca_currency;
+delete from bsca_postendertype;
+delete from closedcash;
+delete from customers;
+delete from payments;
+delete from people;
+delete from products_value;
+delete from products;
+delete from categories;
+delete from receipts;
+delete from roles;
+delete from taxes;
+delete from taxcategories;
+delete from ticketlines;
+delete from tickets;

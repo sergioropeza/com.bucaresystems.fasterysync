@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW pos.bsca_people_v
+CREATE OR REPLACE VIEW bsca_people_v
 AS SELECT (u.ad_user_id || ''::text) || u.ad_org_id AS id,
     u.name,
     u.password AS apppassword,

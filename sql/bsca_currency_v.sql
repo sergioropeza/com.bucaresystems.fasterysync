@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW pos.bsca_currency_v
+CREATE OR REPLACE VIEW bsca_currency_v
 AS SELECT cc.c_currency_id AS id,
     cc.description AS name,
     cc.iso_code AS isocode,

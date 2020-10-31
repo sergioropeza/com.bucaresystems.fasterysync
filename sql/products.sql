@@ -1,4 +1,4 @@
-CREATE TABLE pos.products (
+CREATE TABLE products (
 	id varchar(255) NOT NULL,
 	reference varchar(255) NOT NULL,
 	code varchar(255) NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE pos.products (
 	CONSTRAINT products_inx_0 UNIQUE (reference, node_id),
 	CONSTRAINT products_inx_1 UNIQUE (code, node_id),
 	CONSTRAINT products_pkey PRIMARY KEY (id),
-	CONSTRAINT products_fk_1 FOREIGN KEY (category) REFERENCES pos.categories(id),
-	CONSTRAINT products_taxcat_fk FOREIGN KEY (taxcat) REFERENCES pos.taxcategories(id)
+	CONSTRAINT products_fk_1 FOREIGN KEY (category) REFERENCES categories(id),
+	CONSTRAINT products_taxcat_fk FOREIGN KEY (taxcat) REFERENCES taxcategories(id)
 );
-CREATE UNIQUE INDEX products_attrset_fx ON pos.products USING btree (attributeset_id);
+CREATE UNIQUE INDEX products_attrset_fx ON products USING btree (attributeset_id);

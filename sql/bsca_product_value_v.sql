@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW pos.bsca_products_value_v
+CREATE OR REPLACE VIEW bsca_products_value_v
 AS SELECT (pv.bsca_productvalue_id::text || pv.m_product_id) || org.ad_org_id AS id,
     pv.m_product_id::text || org.ad_org_id AS product,
     pv.value,

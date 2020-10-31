@@ -25,6 +25,7 @@ public class BSCA_EProduct extends CustomEvent{
 					BSCA_Products products  = new BSCA_Products(trxName, M_Product_ID,productOrg.getAD_Org_ID());
 					if (products.isAllRegister()){ // Producto, Organización, Precio y Código
 						products.save();
+						products.saveProductsValue();
 					}
 			}		
 		}
