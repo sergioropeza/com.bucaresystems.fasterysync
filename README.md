@@ -59,3 +59,6 @@ bin/sym
 
 #### Synchronization  Tender Type:
 - Register o Update tender type (new window Tender Type POS) 
+
+#### Update Multiply Rate Currency:
+- Register o Update Conversion Rate POS (new table BSCA_Conversion_Rate) 
