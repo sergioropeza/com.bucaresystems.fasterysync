@@ -29,6 +29,7 @@ import org.compiere.model.MUser;
 import org.compiere.model.X_C_POSTenderType;
 
 import com.bucaresystems.fasterysync.base.CustomEventFactory;
+import com.bucaresystems.fasterysync.event.BSCA_EConversionRate;
 import com.bucaresystems.fasterysync.event.BSCA_ECurrency;
 import com.bucaresystems.fasterysync.event.BSCA_EPosTenderType;
 import com.bucaresystems.fasterysync.event.BSCA_EProduct;
@@ -79,6 +80,8 @@ public class EventFactory extends CustomEventFactory {
 		registerEvent(IEventTopics.PO_AFTER_NEW, MCurrency.Table_Name,BSCA_ECurrency.class);
 		registerEvent(IEventTopics.PO_AFTER_CHANGE, X_C_POSTenderType.Table_Name, BSCA_EPosTenderType.class);	
 		registerEvent(IEventTopics.PO_AFTER_NEW, X_C_POSTenderType.Table_Name,BSCA_EPosTenderType.class);
+		registerEvent(IEventTopics.PO_AFTER_CHANGE, "BSCA_Conversion_Rate", BSCA_EConversionRate.class);	
+		registerEvent(IEventTopics.PO_AFTER_NEW,"BSCA_Conversion_Rate",BSCA_EConversionRate.class);
 
 	}
 

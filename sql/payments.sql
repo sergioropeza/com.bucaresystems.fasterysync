@@ -12,6 +12,7 @@ CREATE TABLE payments (
 	cardname varchar(255) NULL DEFAULT NULL::character varying,
 	voucher varchar(255) NULL DEFAULT NULL::character varying,
 	orgvalue varchar(255)  DEFAULT NULL,
+	multiplyrate varchar(255)  DEFAULT NULL,
 	CONSTRAINT pk_tr_payments PRIMARY KEY (id),
 	CONSTRAINT payments_fk_receipt FOREIGN KEY (receipt) REFERENCES receipts(id)
 );
