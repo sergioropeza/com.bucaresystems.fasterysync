@@ -24,6 +24,8 @@ insert into sym_channel (channel_id, processing_order, max_batch_size, enabled, 
 				  values('customers', 50, 100000, 1, 'Product and pricing data');
 insert into sym_channel (channel_id, processing_order, max_batch_size, enabled, description)
 				  values('sales', 50, 100000, 1, 'Product and pricing data');
+insert into sym_channel (channel_id, processing_order, max_batch_size, enabled, description)
+				  values('currency', 50, 100000, 1, 'Currency and Multyply Rate');
 
  ------------------------------------------------------------------------------
 -- Triggers
@@ -56,7 +58,7 @@ insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_tim
 insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
 				  values('closedcash','closedcash','sales',current_timestamp,current_timestamp);
 insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('bsca_currency','bsca_currency','sales',current_timestamp,current_timestamp);
+				  values('bsca_currency','bsca_currency','currency',current_timestamp,current_timestamp);
 insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
 				  values('bsca_postendertype','bsca_postendertype','sales',current_timestamp,current_timestamp);		
 

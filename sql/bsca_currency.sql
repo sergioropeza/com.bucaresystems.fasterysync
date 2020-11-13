@@ -4,6 +4,7 @@ CREATE TABLE bsca_currency (
 	isocode varchar(5) NOT NULL,
 	cursymbol varchar(10) NOT NULL,
 	multiplyrate numeric NOT NULL DEFAULT 1,
+	isConversionCurrency BOOLEAN NOT NULL DEFAULT FALSE,
 	isactive bool NOT NULL DEFAULT true,
 	node_id varchar(25) NULL,
 	idempiere_id numeric NULL,
