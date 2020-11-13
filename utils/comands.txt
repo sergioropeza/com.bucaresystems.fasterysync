@@ -9,3 +9,5 @@
 
 - Compare two symmetricds database 
 	./dbcompare TABLENAME -s ../engines/corp.properties -t ../engines/store.properties --output-sql diff.sql --use-sym-config true
+
+	
