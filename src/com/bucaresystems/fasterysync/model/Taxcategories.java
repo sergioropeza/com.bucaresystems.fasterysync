@@ -4,7 +4,8 @@ import org.compiere.util.DB;
 
 public class Taxcategories{
 
-	public static final String Table_Name = "taxcategories";
+	public static final String Table_Name = "pos.taxcategories";
+	public static final String View_Name = "pos.BSCA_taxcategories_v";
 	protected Object id;
 	protected Object idempiere_id;
 	protected Object name;
@@ -38,7 +39,7 @@ public class Taxcategories{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (id,idempiere_id,name)"+
-		"(Select id,idempiere_id,name from bsca_taxcategories_v where 1=1 "+whereClause+")";
+		"(Select id,idempiere_id,name from "+View_Name+" where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -47,7 +48,7 @@ public class Taxcategories{
 		"id= b.id,"+
 		"idempiere_id= b.idempiere_id,"+
 		"name= b.name "+
-		"from bsca_taxcategories_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from "+View_Name+" b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {

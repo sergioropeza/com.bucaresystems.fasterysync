@@ -4,7 +4,8 @@ import org.compiere.util.DB;
 
 public class Postendertype{
 
-	public static final String Table_Name = "bsca_postendertype";
+	public static final String Table_Name = "pos.bsca_postendertype";
+	public static final String View_Name = "pos.BSCA_postendertype_v";
 	protected Object idempiere_id;
 	protected Object issetdifference;
 	protected Object isactive;
@@ -80,7 +81,7 @@ public class Postendertype{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id)"+
-		"(Select idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id from bsca_postendertype_v where 1=1 "+whereClause+")";
+		"(Select idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id from "+View_Name+" where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -95,7 +96,7 @@ public class Postendertype{
 		"name= b.name,"+
 		"classname= b.classname,"+
 		"node_id= b.node_id "+
-		"from bsca_postendertype_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from "+View_Name+" b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {

@@ -1,4 +1,4 @@
-CREATE TABLE payments (
+CREATE TABLE pos.payments (
 	id varchar(255) NOT NULL,
 	receipt varchar(255) NOT NULL,
 	payment varchar(255) NOT NULL,
@@ -14,6 +14,6 @@ CREATE TABLE payments (
 	orgvalue varchar(255)  DEFAULT NULL,
 	multiplyrate varchar(255)  DEFAULT NULL,
 	CONSTRAINT pk_tr_payments PRIMARY KEY (id),
-	CONSTRAINT payments_fk_receipt FOREIGN KEY (receipt) REFERENCES receipts(id)
+	CONSTRAINT payments_fk_receipt FOREIGN KEY (receipt) REFERENCES pos.receipts(id)
 );
-CREATE INDEX payments_payment_idx ON payments USING btree (payment);
+CREATE INDEX payments_payment_idx ON pos.payments USING btree (payment);

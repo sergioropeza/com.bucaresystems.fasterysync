@@ -4,7 +4,8 @@ import org.compiere.util.DB;
 
 public class Currency{
 
-	public static final String Table_Name = "bsca_currency";
+	public static final String Table_Name = "pos.bsca_currency";
+	public static final String View_Name = "pos.BSCA_currency_v";
 	protected Object idempiere_id;
 	protected Object multiplyrate;
 	protected Object isactive;
@@ -73,7 +74,7 @@ public class Currency{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (idempiere_id,multiplyrate,isactive,id,node_id,name,isocode,cursymbol)"+
-		"(Select idempiere_id,multiplyrate,isactive,id,node_id,name,isocode,cursymbol from bsca_currency_v where 1=1 "+whereClause+")";
+		"(Select idempiere_id,multiplyrate,isactive,id,node_id,name,isocode,cursymbol from "+View_Name+" where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -87,7 +88,7 @@ public class Currency{
 		"name= b.name,"+
 		"isocode= b.isocode,"+
 		"cursymbol= b.cursymbol "+
-		"from bsca_currency_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from "+View_Name+" b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {

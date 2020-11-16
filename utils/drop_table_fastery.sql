@@ -1,0 +1,15 @@
+drop table  bsca_currency;
+drop table  bsca_postendertype;
+drop table  closedcash;
+drop table  customers;
+drop table  payments;
+drop table  people;
+drop table  products_value;
+drop table  products;
+drop table  categories;
+drop table  receipts;
+drop table  roles;
+drop table  taxes;
+drop table  taxcategories;
+drop table  ticketlines;
+drop table  tickets;

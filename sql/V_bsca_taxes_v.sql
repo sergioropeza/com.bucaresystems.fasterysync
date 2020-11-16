@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW bsca_taxes_v
+CREATE OR REPLACE VIEW pos.bsca_taxes_v
 AS SELECT c_tax.c_tax_id AS id,
     c_tax.name,
     c_tax.c_taxcategory_id AS category,

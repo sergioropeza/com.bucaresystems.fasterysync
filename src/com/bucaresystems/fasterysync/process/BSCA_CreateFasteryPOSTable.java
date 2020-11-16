@@ -1,14 +1,8 @@
 package com.bucaresystems.fasterysync.process;
 
 import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
-import org.apache.commons.io.comparator.NameFileComparator;
+
 import com.bucaresystems.fasterysync.base.CustomProcess;
 import com.bucaresystems.fasterysync.util.SqlBuilder;
 

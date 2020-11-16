@@ -1,4 +1,4 @@
-CREATE TABLE people (
+CREATE TABLE pos.people (
 	id varchar(255) NOT NULL,
 	"name" varchar(255) NOT NULL,
 	apppassword varchar(255) NULL DEFAULT NULL::character varying,
@@ -11,5 +11,5 @@ CREATE TABLE people (
 	idempiere_ID numeric NULL,
 	CONSTRAINT people_name_inx UNIQUE (name),
 	CONSTRAINT pk PRIMARY KEY (id),
-	CONSTRAINT people_fk_1 FOREIGN KEY (role) REFERENCES roles(id)
+	CONSTRAINT people_fk_1 FOREIGN KEY (role) REFERENCES pos.roles(id)
 );

@@ -4,7 +4,8 @@ import org.compiere.util.DB;
 
 public class Products_value{
 
-	public static final String Table_Name = "products_value";
+	public static final String Table_Name = "pos.products_value";
+	public static final String View_Name = "pos.BSCA_products_value_v";
 	protected Object qty;
 	protected Object isdefaultvalue;
 	protected Object idempiere_id;
@@ -108,7 +109,7 @@ public class Products_value{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (qty,isdefaultvalue,idempiere_id,ad_org_id,m_product_id,isactive,ismastervalue,isplucode,isdefault,product,value,id,node_id)"+
-		"(Select qty,isdefaultvalue,idempiere_id,ad_org_id,m_product_id,isactive,ismastervalue,isplucode,isdefault,product,value,id,node_id from bsca_products_value_v where 1=1 "+whereClause+")";
+		"(Select qty,isdefaultvalue,idempiere_id,ad_org_id,m_product_id,isactive,ismastervalue,isplucode,isdefault,product,value,id,node_id from "+View_Name+" where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -127,7 +128,7 @@ public class Products_value{
 		"value= b.value,"+
 		"id= b.id,"+
 		"node_id= b.node_id "+
-		"from bsca_products_value_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from "+View_Name+" b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {

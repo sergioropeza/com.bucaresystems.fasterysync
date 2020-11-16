@@ -1,4 +1,4 @@
-CREATE TABLE customers (
+CREATE TABLE pos.customers (
 	id varchar(255) NOT NULL,
 	searchkey varchar(255) NOT NULL,
 	taxid varchar(255) NULL DEFAULT NULL::character varying,
@@ -30,6 +30,6 @@ CREATE TABLE customers (
 	CONSTRAINT customers_skey_inx UNIQUE (searchkey),
 	CONSTRAINT pk_customers PRIMARY KEY (id)
 );
-CREATE INDEX customers_card_inx ON customers USING btree (card);
-CREATE INDEX customers_name_inx ON customers USING btree (name);
-CREATE INDEX customers_taxid_inx ON customers USING btree (taxid);
+CREATE INDEX customers_card_inx ON pos.customers USING btree (card);
+CREATE INDEX customers_name_inx ON pos.customers USING btree (name);
+CREATE INDEX customers_taxid_inx ON pos.customers USING btree (taxid);

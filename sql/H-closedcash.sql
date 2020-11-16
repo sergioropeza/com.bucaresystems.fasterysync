@@ -1,4 +1,4 @@
-CREATE TABLE closedcash (
+CREATE TABLE pos.closedcash (
 	"money" varchar(255) NOT NULL,
 	host varchar(255) NOT NULL,
 	hostsequence int4 NOT NULL,
@@ -9,4 +9,4 @@ CREATE TABLE closedcash (
 	CONSTRAINT closedcash_inx_seq UNIQUE (host, hostsequence),
 	CONSTRAINT closedcash_pkey PRIMARY KEY (money)
 );
-CREATE INDEX closedcash_inx_1 ON closedcash USING btree (datestart);
+CREATE INDEX closedcash_inx_1 ON pos.closedcash USING btree (datestart);

@@ -1,4 +1,4 @@
-CREATE TABLE roles (
+CREATE TABLE pos.roles (
 	id varchar(255) NOT NULL,
 	"name" varchar(255) NOT NULL,
 	permissions bytea NULL,

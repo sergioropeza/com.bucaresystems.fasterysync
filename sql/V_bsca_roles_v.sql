@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW bsca_roles_v
+CREATE OR REPLACE VIEW pos.bsca_roles_v
 AS SELECT rp.bsca_rolespos_id AS id,
     rp.name,
     org.value AS node_id,

@@ -1,4 +1,4 @@
-CREATE TABLE bsca_currency (
+CREATE TABLE pos.bsca_currency (
 	id varchar(255) NOT NULL,
 	"name" varchar(255) NOT NULL,
 	isocode varchar(5) NOT NULL,

@@ -4,7 +4,8 @@ import org.compiere.util.DB;
 
 public class People{
 
-	public static final String Table_Name = "people";
+	public static final String Table_Name = "pos.people";
+	public static final String View_Name = "pos.BSCA_people_v";
 	protected Object role;
 	protected Object ad_user_id;
 	protected Object idempiere_id;
@@ -66,7 +67,7 @@ public class People{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (role,ad_user_id,idempiere_id,id,node_id,name,apppassword)"+
-		"(Select role,ad_user_id,idempiere_id,id,node_id,name,apppassword from bsca_people_v where 1=1 "+whereClause+")";
+		"(Select role,ad_user_id,idempiere_id,id,node_id,name,apppassword from "+View_Name+" where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -79,7 +80,7 @@ public class People{
 		"node_id= b.node_id,"+
 		"name= b.name,"+
 		"apppassword= b.apppassword "+
-		"from bsca_people_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from "+View_Name+" b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {

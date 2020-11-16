@@ -31,36 +31,36 @@ insert into sym_channel (channel_id, processing_order, max_batch_size, enabled, 
 -- Triggers
 ------------------------------------------------------------------------------
 
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('people','people','users',current_timestamp,current_timestamp);	
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('roles','roles','users',current_timestamp,current_timestamp);
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('categories','categories','products',current_timestamp,current_timestamp);
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('products','products','products',current_timestamp,current_timestamp);
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('products_value','products_value','products',current_timestamp,current_timestamp);
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('taxcategories','taxcategories','products',current_timestamp,current_timestamp);
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('taxes','taxes','products',current_timestamp,current_timestamp);
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('customers','customers','customers',current_timestamp,current_timestamp);	
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('receipts','receipts','sales',current_timestamp,current_timestamp);	
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('payments','payments','sales',current_timestamp,current_timestamp);
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('tickets','tickets','sales',current_timestamp,current_timestamp);	
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('ticketlines','ticketlines','sales',current_timestamp,current_timestamp);
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('closedcash','closedcash','sales',current_timestamp,current_timestamp);
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('bsca_currency','bsca_currency','currency',current_timestamp,current_timestamp);
-insert into sym_trigger (trigger_id,source_table_name,channel_id,last_update_time,create_time)
-				  values('bsca_postendertype','bsca_postendertype','sales',current_timestamp,current_timestamp);		
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('people','pos','people','users',current_timestamp,current_timestamp);	
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('roles','pos','roles','users',current_timestamp,current_timestamp);
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('categories','pos','categories','products',current_timestamp,current_timestamp);
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('products','pos','products','products',current_timestamp,current_timestamp);
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('products_value','pos','products_value','products',current_timestamp,current_timestamp);
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('taxcategories','pos','taxcategories','products',current_timestamp,current_timestamp);
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('taxes','pos','taxes','products',current_timestamp,current_timestamp);
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('customers','pos','customers','customers',current_timestamp,current_timestamp);	
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('receipts','pos','receipts','sales',current_timestamp,current_timestamp);	
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('payments','pos','payments','sales',current_timestamp,current_timestamp);
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('tickets','pos','tickets','sales',current_timestamp,current_timestamp);	
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('ticketlines','pos','ticketlines','sales',current_timestamp,current_timestamp);
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('closedcash','pos','closedcash','sales',current_timestamp,current_timestamp);
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('bsca_currency','pos','bsca_currency','currency',current_timestamp,current_timestamp);
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time)
+				  values('bsca_postendertype','pos','bsca_postendertype','sales',current_timestamp,current_timestamp);		
 
 				  
 ------------------------------------------------------------------------------

@@ -4,7 +4,8 @@ import org.compiere.util.DB;
 
 public class Products{
 
-	public static final String Table_Name = "products";
+	public static final String Table_Name = "pos.products";
+	public static final String View_Name = "pos.BSCA_products_v";
 	protected Object ad_org_id;
 	protected Object pricebuy;
 	protected Object pricesell;
@@ -108,7 +109,7 @@ public class Products{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (ad_org_id,pricebuy,pricesell,category,taxcat,idempiere_id,m_pricelist_version_id,reference,code,codetype,name,node_id,id)"+
-		"(Select ad_org_id,pricebuy,pricesell,category,taxcat,idempiere_id,m_pricelist_version_id,reference,code,codetype,name,node_id,id from bsca_products_v where 1=1 "+whereClause+")";
+		"(Select ad_org_id,pricebuy,pricesell,category,taxcat,idempiere_id,m_pricelist_version_id,reference,code,codetype,name,node_id,id from "+View_Name+" where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -127,7 +128,7 @@ public class Products{
 		"name= b.name,"+
 		"node_id= b.node_id,"+
 		"id= b.id "+
-		"from bsca_products_v b where  a.id = cast(b.ID as text)  "+whereClause;
+		"from "+View_Name+" b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};
 	private boolean isRegister() {
