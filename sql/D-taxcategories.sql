@@ -1,6 +1,6 @@
 CREATE TABLE pos.taxcategories (
-	id varchar(255) NOT NULL,
-	"name" varchar(255) NOT NULL,
+	id varchar NOT NULL,
+	"name" varchar NOT NULL,
 	idempiere_id numeric NULL,
 	CONSTRAINT taxcategories_pkey PRIMARY KEY (id)
 );

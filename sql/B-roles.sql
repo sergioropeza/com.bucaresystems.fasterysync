@@ -1,6 +1,6 @@
 CREATE TABLE pos.roles (
-	id varchar(255) NOT NULL,
-	"name" varchar(255) NOT NULL,
+	id varchar NOT NULL,
+	"name" varchar NOT NULL,
 	permissions bytea NULL,
 	node_id varchar(255) NULL,
 	idempiere_id numeric NULL,
