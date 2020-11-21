@@ -4,7 +4,7 @@ CREATE TABLE pos.people (
 	apppassword varchar NULL,
 	card varchar NULL,
 	"role" varchar NOT NULL,
-	visible bool NOT NULL,
+	visible bool NOT NULL DEFAULT true,
 	image bytea NULL,
 	node_id varchar(25) NULL,
 	ad_user_id numeric NULL,

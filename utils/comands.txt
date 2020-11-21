@@ -9,3 +9,7 @@
 
 - Compare two symmetricds database 
 	./dbcompare TABLENAME -s ../engines/corp.properties -t ../engines/store.properties --output-sql diff.sql --use-sym-config true
+
+- Reload node
+   ./symadmin --engine corp-000 reload-node B02
+   

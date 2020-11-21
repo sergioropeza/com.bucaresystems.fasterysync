@@ -27,10 +27,9 @@ CREATE TABLE pos.customers (
 	discount float8 NULL DEFAULT 0,
 	memodate timestamp NULL DEFAULT now(),
 	gender varchar(255) NULL,
-	CONSTRAINT customers_pkey PRIMARY KEY (id),
-	CONSTRAINT customers_taxcat FOREIGN KEY (taxcategory) REFERENCES taxcustcategories(id)
+	CONSTRAINT customers_skey_inx UNIQUE (searchkey),
+	CONSTRAINT pk_customers PRIMARY KEY (id)
 );
-CREATE INDEX customers_card_inx ON customers USING btree (card);
-CREATE INDEX customers_name_inx ON customers USING btree (name);
-CREATE UNIQUE INDEX customers_skey_inx ON customers USING btree (searchkey);
-CREATE INDEX customers_taxid_inx ON customers USING btree (taxid);
+CREATE INDEX customers_card_inx ON pos.customers USING btree (card);
+CREATE INDEX customers_name_inx ON pos.customers USING btree (name);
+CREATE INDEX customers_taxid_inx ON pos.customers USING btree (taxid);

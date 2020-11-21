@@ -3,7 +3,7 @@ AS SELECT cc.c_currency_id AS id,
     cc.description AS name,
     cc.iso_code AS isocode,
     cc.cursymbol,
-    0 AS multiplyrate,
+    1 AS multiplyrate,
         CASE
             WHEN cc.isactive = 'Y'::bpchar THEN true
             ELSE false
