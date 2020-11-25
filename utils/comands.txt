@@ -13,3 +13,19 @@
 - Reload node
    ./symadmin --engine corp-000 reload-node B02
    
+   
+   
+   error en salida de lotes 
+   
+   select * from sym_outgoing_batch where error_flag=1;
+
+select * from sym_data where data_id in
+   (select data_id from sym_data_event where batch_id='34');
+  
+  select * from sym_data where data_id in
+    (select failed_data_id from sym_outgoing_batch where batch_id='34');
+   
+   update sym_outgoing_batch set status='OK' where batch_id= '41'
+   
+   delete from sym_data_event where batch_id='34' and data_id='287'
+   

@@ -29,6 +29,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 
+import com.bucaresystems.fasterysync.base.CustomProcess;
 import com.bucaresystems.fasterysync.model.BCSA_Customers;
 import com.bucaresystems.fasterysync.model.BSCA_ClosedCash;
 import com.bucaresystems.fasterysync.model.BSCA_Payments;
@@ -37,7 +38,7 @@ import com.bucaresystems.fasterysync.model.BSCA_TickeLines;
 import com.bucaresystems.fasterysync.model.BSCA_Tickets;
 
 
-public class BSCA_ImportSales extends SvrProcess{
+public class BSCA_ImportSales extends CustomProcess{
 
 	protected int C_DocTypeTarget_ID;
 	protected int C_BPartner_ID;
