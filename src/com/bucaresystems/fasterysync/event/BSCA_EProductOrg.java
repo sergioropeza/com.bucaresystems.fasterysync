@@ -3,7 +3,7 @@ package com.bucaresystems.fasterysync.event;
 import org.adempiere.base.event.IEventTopics;
 
 import com.bucaresystems.fasterysync.base.CustomEvent;
-import com.bucaresystems.fasterysync.model.BSCA_Products;
+import com.bucaresystems.fasterysync.pos.model.BSCA_Products;
 
 public class BSCA_EProductOrg extends CustomEvent{
 

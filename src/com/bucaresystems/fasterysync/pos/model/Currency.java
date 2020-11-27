@@ -1,44 +1,45 @@
-package com.bucaresystems.fasterysync.model;
+package com.bucaresystems.fasterysync.pos.model;
 
 import org.compiere.util.DB;
 
-public class People{
+public class Currency{
 
-	public static final String Table_Name = "pos.people";
-	public static final String View_Name = "pos.BSCA_people_v";
-	protected Object role;
-	protected Object ad_user_id;
+	public static final String Table_Name = "pos.bsca_currency";
+	public static final String View_Name = "pos.BSCA_currency_v";
 	protected Object idempiere_id;
+	protected Object multiplyrate;
+	protected Object isactive;
 	protected Object id;
 	protected Object node_id;
 	protected Object name;
-	protected Object apppassword;
+	protected Object isocode;
+	protected Object cursymbol;
 	protected String trxName;
 
-	public People(String trxName){
+	public Currency(String trxName){
 		this.trxName = trxName;
 	}
-	public People(String trxName, Object idempiere_ID){
+	public Currency(String trxName, Object idempiere_ID){
 		this(trxName);
 		this.idempiere_id = idempiere_ID;
-	}
-	public Object getRole() {
-		return role;
-	}
-	public void setRole(Object role) {
-		this.role = role;
-	}
-	public Object getAd_user_id() {
-		return ad_user_id;
-	}
-	public void setAd_user_id(Object ad_user_id) {
-		this.ad_user_id = ad_user_id;
 	}
 	public Object getIdempiere_id() {
 		return idempiere_id;
 	}
 	public void setIdempiere_id(Object idempiere_id) {
 		this.idempiere_id = idempiere_id;
+	}
+	public Object getMultiplyrate() {
+		return multiplyrate;
+	}
+	public void setMultiplyrate(Object multiplyrate) {
+		this.multiplyrate = multiplyrate;
+	}
+	public Object getIsactive() {
+		return isactive;
+	}
+	public void setIsactive(Object isactive) {
+		this.isactive = isactive;
 	}
 	public Object getId() {
 		return id;
@@ -58,28 +59,35 @@ public class People{
 	public void setName(Object name) {
 		this.name = name;
 	}
-	public Object getApppassword() {
-		return apppassword;
+	public Object getIsocode() {
+		return isocode;
 	}
-	public void setApppassword(Object apppassword) {
-		this.apppassword = apppassword;
+	public void setIsocode(Object isocode) {
+		this.isocode = isocode;
+	}
+	public Object getCursymbol() {
+		return cursymbol;
+	}
+	public void setCursymbol(Object cursymbol) {
+		this.cursymbol = cursymbol;
 	}
 	public void save(String whereClause) {
 
-		String sql ="Insert Into "+Table_Name+" (role,ad_user_id,idempiere_id,id,node_id,name,apppassword)"+
-		"(Select role,ad_user_id,idempiere_id,id,node_id,name,apppassword from "+View_Name+" where 1=1 "+whereClause+")";
+		String sql ="Insert Into "+Table_Name+" (idempiere_id,multiplyrate,isactive,id,node_id,name,isocode,cursymbol)"+
+		"(Select idempiere_id,multiplyrate,isactive,id,node_id,name,isocode,cursymbol from "+View_Name+" where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
 
 		String sql ="Update "+Table_Name+" a set "+
-		"role= b.role,"+
-		"ad_user_id= b.ad_user_id,"+
 		"idempiere_id= b.idempiere_id,"+
+		"multiplyrate= b.multiplyrate,"+
+		"isactive= b.isactive,"+
 		"id= b.id,"+
 		"node_id= b.node_id,"+
 		"name= b.name,"+
-		"apppassword= b.apppassword "+
+		"isocode= b.isocode,"+
+		"cursymbol= b.cursymbol "+
 		"from "+View_Name+" b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
 	};

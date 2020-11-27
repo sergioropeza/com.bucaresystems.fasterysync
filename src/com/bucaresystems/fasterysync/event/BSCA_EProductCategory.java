@@ -1,7 +1,7 @@
 package com.bucaresystems.fasterysync.event;
 
 import com.bucaresystems.fasterysync.base.CustomEvent;
-import com.bucaresystems.fasterysync.model.Categories;
+import com.bucaresystems.fasterysync.pos.model.Categories;
 
 public class BSCA_EProductCategory extends CustomEvent{
 

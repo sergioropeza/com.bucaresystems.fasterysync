@@ -1,7 +1,7 @@
 package com.bucaresystems.fasterysync.event;
 
 import com.bucaresystems.fasterysync.base.CustomEvent;
-import com.bucaresystems.fasterysync.model.People;
+import com.bucaresystems.fasterysync.pos.model.People;
 
 public class BSCA_EUser extends CustomEvent{
 

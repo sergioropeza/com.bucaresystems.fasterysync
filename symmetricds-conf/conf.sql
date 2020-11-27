@@ -25,7 +25,8 @@ insert into sym_channel (channel_id, processing_order, max_batch_size, enabled, 
 insert into sym_channel (channel_id, processing_order, max_batch_size, enabled, description)
 				  values('sales', 50, 100000, 1, 'Product and pricing data');
 insert into sym_channel (channel_id, processing_order, max_batch_size, enabled, description)
-				  values('currency', 50, 100000, 1, 'Currency and Multyply Rate');
+				  values('trx_currency', 50, 100000, 1, 'Currency and Multyply Rate');
+
 
  ------------------------------------------------------------------------------
 -- Triggers
@@ -58,9 +59,9 @@ insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel
 insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time,sync_on_incoming_batch)
 				  values('closedcash','pos','closedcash','sales',current_timestamp,current_timestamp,1);
 insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time,sync_on_incoming_batch)
-				  values('bsca_currency','pos','bsca_currency','currency',current_timestamp,current_timestamp,1);
+				  values('bsca_currency','pos','bsca_currency','trx_currency',current_timestamp,current_timestamp,1);
 insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time,sync_on_incoming_batch)
-				  values('bsca_postendertype','pos','bsca_postendertype','sales',current_timestamp,current_timestamp,1);		
+				  values('bsca_postendertype','pos','bsca_postendertype','trx_currency',current_timestamp,current_timestamp,1);		
 
 				  
 ------------------------------------------------------------------------------
@@ -224,83 +225,86 @@ insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel
 insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time, sync_on_insert, sync_on_update, sync_on_delete)
 				  values('customers_initload','pos','customers','customers',current_timestamp,current_timestamp,0,0,0);		
 insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time, sync_on_insert, sync_on_update, sync_on_delete)
-				  values('bsca_currency_initload','pos','bsca_currency','currency',current_timestamp,current_timestamp,0,0,0);	
+				  values('bsca_currency_initload','pos','bsca_currency','trx_currency',current_timestamp,current_timestamp,0,0,0);	
 insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time, sync_on_insert, sync_on_update, sync_on_delete)
-				  values('bsca_postendertype_initload','pos','bsca_postendertype','sales',current_timestamp,current_timestamp,0,0,0);	
+				  values('bsca_postendertype_initload','pos','bsca_postendertype','trx_currency',current_timestamp,current_timestamp,0,0,0);	
 				 
-				 				 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('people_initload','corp_2_one_store', 100, current_timestamp, current_timestamp);
+values('roles_initload','corp_2_store', 10, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('people_initload','store_2_workstation', 100, current_timestamp, current_timestamp);
+values('roles_initload','store_2_workstation', 10, current_timestamp, current_timestamp);
+
+				 
+insert into sym_trigger_router 
+(trigger_id,router_id,initial_load_order,last_update_time,create_time)
+values('people_initload','corp_2_one_store', 20, current_timestamp, current_timestamp);
+insert into sym_trigger_router 
+(trigger_id,router_id,initial_load_order,last_update_time,create_time)
+values('people_initload','store_2_workstation', 20, current_timestamp, current_timestamp);
+
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('customers_initload','corp_2_store', 100, current_timestamp, current_timestamp);
+values('customers_initload','corp_2_store', 10, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('customers_initload','store_2_workstation', 100, current_timestamp, current_timestamp);
+values('customers_initload','store_2_workstation', 10, current_timestamp, current_timestamp);
+
+
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('roles_initload','corp_2_store', 100, current_timestamp, current_timestamp);
+values('categories_initload','corp_2_store', 10, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('roles_initload','store_2_workstation', 100, current_timestamp, current_timestamp);
+values('categories_initload','store_2_workstation', 10, current_timestamp, current_timestamp);
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('categories_initload','corp_2_store', 100, current_timestamp, current_timestamp);
+values('taxcategories_initload','corp_2_store', 10, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('categories_initload','store_2_workstation', 100, current_timestamp, current_timestamp);
+values('taxcategories_initload','store_2_workstation', 10, current_timestamp, current_timestamp);
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('products_initload','corp_2_one_store', 100, current_timestamp, current_timestamp);
+values('taxes_initload','corp_2_store', 20, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('products_initload','store_2_workstation', 100, current_timestamp, current_timestamp);
+values('taxes_initload','store_2_workstation', 20, current_timestamp, current_timestamp);
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('products_value_initload','corp_2_one_store', 100, current_timestamp, current_timestamp);
+values('products_initload','corp_2_one_store', 30, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('products_value_initload','store_2_workstation', 100, current_timestamp, current_timestamp);
+values('products_initload','store_2_workstation', 30, current_timestamp, current_timestamp);
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('taxcategories_initload','corp_2_store', 100, current_timestamp, current_timestamp);
+values('products_value_initload','corp_2_one_store', 40, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('taxcategories_initload','store_2_workstation', 100, current_timestamp, current_timestamp);
+values('products_value_initload','store_2_workstation', 40, current_timestamp, current_timestamp);
+
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('taxes_initload','corp_2_store', 100, current_timestamp, current_timestamp);
+values('bsca_currency_initload','corp_2_store', 10, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('taxes_initload','store_2_workstation', 100, current_timestamp, current_timestamp);
+values('bsca_currency_initload','store_2_workstation', 10, current_timestamp, current_timestamp);
 
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('bsca_currency_initload','corp_2_store', 100, current_timestamp, current_timestamp);
+values('bsca_postendertype_initload','corp_2_store', 20, current_timestamp, current_timestamp);
 insert into sym_trigger_router 
 (trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('bsca_currency_initload','store_2_workstation', 100, current_timestamp, current_timestamp);
-
-insert into sym_trigger_router 
-(trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('bsca_postendertype_initload','corp_2_store', 100, current_timestamp, current_timestamp);
-insert into sym_trigger_router 
-(trigger_id,router_id,initial_load_order,last_update_time,create_time)
-values('bsca_postendertype_initload','store_2_workstation', 100, current_timestamp, current_timestamp);
+values('bsca_postendertype_initload','store_2_workstation', 20, current_timestamp, current_timestamp);
 				  
-				 
-				 
+								 
 
 insert into sym_parameter(external_id, node_group_id, param_key, param_value, create_time, last_update_by, last_update_time)
 (select 'ALL','ALL','auto.registration','true',null,'admin',null where (select distinct 1 from sym_parameter where  external_id = 'ALL' and node_group_id = 'ALL' and param_key = 'auto.registration') is null);

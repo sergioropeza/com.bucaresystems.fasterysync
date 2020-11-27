@@ -24,21 +24,20 @@ import org.compiere.model.Query;
 import org.compiere.model.X_C_POSPayment;
 import org.compiere.model.X_C_POSTenderType;
 import org.compiere.process.DocAction;
-import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 
 import com.bucaresystems.fasterysync.base.CustomProcess;
-import com.bucaresystems.fasterysync.model.BCSA_Customers;
-import com.bucaresystems.fasterysync.model.BSCA_ClosedCash;
-import com.bucaresystems.fasterysync.model.BSCA_Payments;
-import com.bucaresystems.fasterysync.model.BSCA_Tax;
-import com.bucaresystems.fasterysync.model.BSCA_TickeLines;
-import com.bucaresystems.fasterysync.model.BSCA_Tickets;
+import com.bucaresystems.fasterysync.pos.model.BCSA_Customers;
+import com.bucaresystems.fasterysync.pos.model.BSCA_ClosedCash;
+import com.bucaresystems.fasterysync.pos.model.BSCA_Payments;
+import com.bucaresystems.fasterysync.pos.model.BSCA_Tax;
+import com.bucaresystems.fasterysync.pos.model.BSCA_TickeLines;
+import com.bucaresystems.fasterysync.pos.model.BSCA_Tickets;
 
 
-public class BSCA_ImportSales extends CustomProcess{
+public class BSCA_ImportDetaillSales extends CustomProcess{
 
 	protected int C_DocTypeTarget_ID;
 	protected int C_BPartner_ID;
@@ -63,9 +62,10 @@ public class BSCA_ImportSales extends CustomProcess{
 	protected int p_C_BankAccount_ID;
 	protected static String NATIVE_MARKER = "NATIVE_"+Database.DB_POSTGRESQL+"_KEYWORK";
 	protected String LIMIT_1 = " "+NATIVE_MARKER + "LIMIT 1"+ NATIVE_MARKER;
-	private int AD_Org_ID = 1000006;
+
 	private int M_Warehouse_ID;
 	protected Integer p_LIMIT;
+	private Integer AD_Org_ID;
 	
 
 	@Override
@@ -87,9 +87,10 @@ public class BSCA_ImportSales extends CustomProcess{
 			trx = Trx.get(trxName, false);
 		}
 		String c_sucursal = (new MOrg(Env.getCtx(), AD_OrgOrder_ID, null)).getValue();
-		UpdateBSCA_Route(c_sucursal);
+		
 		if (!validateSucursal(c_sucursal))
 			return "";
+		UpdateBSCA_Route(c_sucursal);
 		importOrderDetaill();
 		
 		return "";
@@ -109,7 +110,7 @@ public class BSCA_ImportSales extends CustomProcess{
 				int BSCA_Route_ID = route.get_ID();
 				String DocumentNo = route.get_ValueAsString("DocumentNo");
 				int C_BankAccount_ID = route.get_ValueAsInt("C_BankAccount_ID");
-				List<BSCA_Tickets> lstTickets = BSCA_Tickets.getListBSCA_TicketsNotImported(route.get_ValueAsString("BSCA_Route_UU"));
+				List<BSCA_Tickets> lstTickets = BSCA_Tickets.getTicketsNotImported(route.get_ValueAsString("BSCA_Route_UU"));
 	
 		forTicket:for (BSCA_Tickets bsca_Tickets : lstTickets) {
 				try{
@@ -316,7 +317,7 @@ public class BSCA_ImportSales extends CustomProcess{
 	}
 	
 	private X_C_POSTenderType getPOSTenderType(String valueTenderType) {
-		return new Query(Env.getCtx(),X_C_POSTenderType.Table_Name,"C_POSTenderType.Value = ?",trxName).
+		return new Query(Env.getCtx(),X_C_POSTenderType.Table_Name,"C_POSTenderType.Name = ?",trxName).
 				setOnlyActiveRecords(true).
 				setParameters(valueTenderType).first();
 	

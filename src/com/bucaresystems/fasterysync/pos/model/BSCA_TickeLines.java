@@ -1,4 +1,4 @@
-package com.bucaresystems.fasterysync.model;
+package com.bucaresystems.fasterysync.pos.model;
 
 public class BSCA_TickeLines {
 

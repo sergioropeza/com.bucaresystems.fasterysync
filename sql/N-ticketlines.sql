@@ -9,6 +9,8 @@ CREATE TABLE pos.ticketlines (
 	"attributes" bytea NULL,
 	productcode varchar(255) NULL,
 	orgvalue varchar(255) NULL DEFAULT NULL::character varying,
+	pricetax float8 NOT NULL ,
+	linenetamt float8 NOT NULL,
 	CONSTRAINT pk_ticketlines PRIMARY KEY (ticket, line),
 	CONSTRAINT ticketlines_fk_2 FOREIGN KEY (ticket) REFERENCES pos.tickets(id),
 	CONSTRAINT ticketlines_fk_3 FOREIGN KEY (product) REFERENCES pos.products(id)

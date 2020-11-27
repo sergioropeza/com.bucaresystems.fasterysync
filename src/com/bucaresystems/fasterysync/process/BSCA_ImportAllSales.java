@@ -9,7 +9,7 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 
-public class BSCA_ImportAllSales extends BSCA_ImportSales{
+public class BSCA_ImportAllSales extends BSCA_ImportDetaillSales{
 	private int p_AD_Org_ID;
 	private List<PO> lstPara;
 	protected Integer p_LIMIT;
@@ -56,7 +56,7 @@ public class BSCA_ImportAllSales extends BSCA_ImportSales{
 				p_M_Product_ID = para.get_ValueAsInt("Value");
 			}else if(para.get_ValueAsString("Name").equals("C_Charge_ID")){
 				C_Charge_ID = para.get_ValueAsInt("Value");
-			}else if(para.get_ValueAsString("Name").equals("isDateStellar")){
+			}else if(para.get_ValueAsString("Name").equals("isDateFastery")){
 				isDateStellar =para.get_ValueAsString("Value").equals("Y")?true:false;
 			}else if(para.get_ValueAsString("Name").equals("AD_OrgOrder_ID")){
 				AD_OrgOrder_ID = para.get_ValueAsInt("Value");

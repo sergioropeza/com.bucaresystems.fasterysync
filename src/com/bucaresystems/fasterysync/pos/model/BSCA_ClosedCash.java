@@ -1,4 +1,4 @@
-package com.bucaresystems.fasterysync.model;
+package com.bucaresystems.fasterysync.pos.model;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +18,7 @@ public class BSCA_ClosedCash {
 	  private Timestamp dateend;
 	  private int nosales;
 	  private int BSCA_Route_ID;
+	  private String person; 
 	  
 	  
 	public String getMoney() {
@@ -98,6 +99,12 @@ public class BSCA_ClosedCash {
 		
 		return lstClosedCash;
 	}
+public String getPerson() {
+	return person;
+}
+public void setPerson(String person) {
+	this.person = person;
+}
 	
 
 }

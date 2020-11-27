@@ -1,4 +1,4 @@
-package com.bucaresystems.fasterysync.model;
+package com.bucaresystems.fasterysync.pos.model;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;

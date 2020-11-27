@@ -1,7 +1,7 @@
 package com.bucaresystems.fasterysync.event;
 
 import com.bucaresystems.fasterysync.base.CustomEvent;
-import com.bucaresystems.fasterysync.model.Postendertype;
+import com.bucaresystems.fasterysync.pos.model.Postendertype;
 
 public class BSCA_EPosTenderType extends CustomEvent{
 

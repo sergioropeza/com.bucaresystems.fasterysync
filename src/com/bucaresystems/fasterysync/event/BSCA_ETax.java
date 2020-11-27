@@ -1,7 +1,7 @@
 package com.bucaresystems.fasterysync.event;
 
 import com.bucaresystems.fasterysync.base.CustomEvent;
-import com.bucaresystems.fasterysync.model.Taxes;
+import com.bucaresystems.fasterysync.pos.model.Taxes;
 
 public class BSCA_ETax extends CustomEvent{
 

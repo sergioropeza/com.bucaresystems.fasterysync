@@ -1,4 +1,4 @@
-package com.bucaresystems.fasterysync.model;
+package com.bucaresystems.fasterysync.pos.model;
 
 import org.compiere.util.DB;
 

@@ -3,7 +3,7 @@ package com.bucaresystems.fasterysync.event;
 import org.adempiere.base.event.IEventTopics;
 
 import com.bucaresystems.fasterysync.base.CustomEvent;
-import com.bucaresystems.fasterysync.model.Currency;
+import com.bucaresystems.fasterysync.pos.model.Currency;
 
 public class BSCA_ECurrency extends CustomEvent{
 

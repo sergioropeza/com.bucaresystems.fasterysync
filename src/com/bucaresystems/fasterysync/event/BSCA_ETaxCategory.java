@@ -1,7 +1,7 @@
 package com.bucaresystems.fasterysync.event;
 
 import com.bucaresystems.fasterysync.base.CustomEvent;
-import com.bucaresystems.fasterysync.model.Taxcategories;
+import com.bucaresystems.fasterysync.pos.model.Taxcategories;
 
 public class BSCA_ETaxCategory extends CustomEvent{
 

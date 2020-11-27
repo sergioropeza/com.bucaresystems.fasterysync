@@ -1,7 +1,7 @@
 package com.bucaresystems.fasterysync.event;
 
 import com.bucaresystems.fasterysync.base.CustomEvent;
-import com.bucaresystems.fasterysync.model.Roles;
+import com.bucaresystems.fasterysync.pos.model.Roles;
 
 public class BSCA_ERolPos  extends CustomEvent{
 

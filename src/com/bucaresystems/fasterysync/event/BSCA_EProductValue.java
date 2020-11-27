@@ -8,7 +8,7 @@ import org.compiere.model.Query;
 import org.compiere.util.Env;
 
 import com.bucaresystems.fasterysync.base.CustomEvent;
-import com.bucaresystems.fasterysync.model.BSCA_Products_Value;
+import com.bucaresystems.fasterysync.pos.model.BSCA_Products_Value;
 
 public class BSCA_EProductValue extends CustomEvent{
 

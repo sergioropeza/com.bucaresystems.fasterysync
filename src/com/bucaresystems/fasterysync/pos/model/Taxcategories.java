@@ -1,20 +1,20 @@
-package com.bucaresystems.fasterysync.model;
+package com.bucaresystems.fasterysync.pos.model;
 
 import org.compiere.util.DB;
 
-public class Categories{
+public class Taxcategories{
 
-	public static final String Table_Name = "pos.categories";
-	public static final String View_Name = "pos.BSCA_categories_v";
+	public static final String Table_Name = "pos.taxcategories";
+	public static final String View_Name = "pos.BSCA_taxcategories_v";
 	protected Object id;
 	protected Object idempiere_id;
 	protected Object name;
 	protected String trxName;
 
-	public Categories(String trxName){
+	public Taxcategories(String trxName){
 		this.trxName = trxName;
 	}
-	public Categories(String trxName, Object idempiere_ID){
+	public Taxcategories(String trxName, Object idempiere_ID){
 		this(trxName);
 		this.idempiere_id = idempiere_ID;
 	}
