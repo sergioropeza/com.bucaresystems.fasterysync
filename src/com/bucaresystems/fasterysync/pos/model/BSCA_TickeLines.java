@@ -1,5 +1,7 @@
 package com.bucaresystems.fasterysync.pos.model;
 
+import java.sql.Timestamp;
+
 public class BSCA_TickeLines {
 
 	  private String ticket;
@@ -10,6 +12,8 @@ public class BSCA_TickeLines {
 	  private String price;
 	  private String taxid;
 	  private String productCode; 
+	  private Timestamp pOSDate;
+	  private String bsca_productValue;
 	  
 	public String getTicket() {
 		return ticket;
@@ -58,6 +62,18 @@ public class BSCA_TickeLines {
 	}
 	public void setProductCode(String codeProduct) {
 		this.productCode = codeProduct;
+	}
+	public Timestamp getPOSDate() {
+		return pOSDate;
+	}
+	public void setPOSDate(Timestamp pOSDate) {
+		this.pOSDate = pOSDate;
+	}
+	public String getBsca_productValue() {
+		return bsca_productValue;
+	}
+	public void setBsca_productValue(String bsca_productValue) {
+		this.bsca_productValue = bsca_productValue;
 	}
 	
 }

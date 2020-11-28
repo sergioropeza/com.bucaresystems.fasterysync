@@ -10,6 +10,15 @@ import java.util.List;
 import org.compiere.util.DB;
 
 public class BSCA_Tickets {
+	
+    public static final int RECEIPT_NORMAL = 0;
+    public static final int RECEIPT_REFUND = 1;
+    public static final int RECEIPT_PAYMENT = 2;
+    public static final int RECEIPT_NOSALE = 3;
+    
+    public static final int REFUND_NOT = 0; // is a non-refunded ticket    
+    public static final int REFUND_PARTIAL = 1;
+    public static final int REFUND_ALL = 2;
 	  
 	private String id;
 	private int tickettype;
@@ -18,6 +27,14 @@ public class BSCA_Tickets {
 	private String customer;
 	private Timestamp date;
 	private int status;
+	private String orgValue; 
+	private String taxAmt;
+	private String grandTotal; 
+	private String fiscaldocumentno; 
+	private String machinefiscalnumber;
+	private String taxid; 
+	private String customerAddress;
+	private String customerName;
 	  
 	public String getId() {
 		return id;
@@ -49,10 +66,10 @@ public class BSCA_Tickets {
 	public void setCustomer(String customer) {
 		this.customer = customer;
 	}
-	public int getStatus() {
+	public int getTicketRefundID() {
 		return status;
 	}
-	public void setStatus(int status) {
+	public void setRefundTicketID(int status) {
 		this.status = status;
 	}
 	public Timestamp getDate() {
@@ -68,8 +85,8 @@ public class BSCA_Tickets {
 		
 		List<BSCA_Tickets> lst = new ArrayList<BSCA_Tickets>();	
 				
-		String sql = "select t.*, r.datenew FROM tickets t "
-					+"JOIN receipts r ON r.id = t.id "
+		String sql = "select t.*, r.datenew FROM pos.tickets t "
+					+"JOIN pos.receipts r ON r.id = t.id "
 					+"where r.money = ? and r.bsca_isimported = false";
 		try {
 			pstmt = DB.prepareStatement(sql, null);
@@ -142,7 +159,7 @@ public class BSCA_Tickets {
 		return lst;
 	}
 	
-	public static List<BSCA_Tickets> getTicketsDetaillNotImported(String closedcash_ID, String orgvalue){
+	public static List<BSCA_Tickets> getTicketsDetaillNotPaySummary(String closedcash_ID, String orgValue, int ticketType){
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
 		
@@ -151,35 +168,85 @@ public class BSCA_Tickets {
 	
 		String sql = "";
 		 
-		sql = " Select n_impuesto, n_total, f_fecha,p.Cs_documento_rel,"
-				  +" cu_documentostellar, cu_documentofiscal, cu_serialimpresora,p.C_numero, p.id ,p.c_rif,p.cu_direccion_cliente,p.c_desc_cliente "
-				  +" FROM MA_Pagos p  "
-				  +" LEFT JOIN ma_documentos_fiscal df ON df.cu_documentostellar = p.c_numero And p.c_sucursal = df.cu_localidad and cu_documentoTipo = p.C_concepto "  
-				  +" where p.c_caja = '"+c_caja+"' and p.turno ="+turno+" and p.c_sucursal= '"+c_sucursal+"' and p.f_fecha = '"+f_fecha+"' and p.c_concepto = '"+c_concepto+"' and bsca_isimported = false"
-				  +" and p.C_Numero NOT IN ("
-				  +" select C_factura FROM MA_Pagos p  "
-				  +	" JOIN MA_detallePAgo dp ON dp.C_factura = p.c_numero"
-				  +	" JOIN C_POSTenderType pt ON pt.value = dp.C_coddenominacion"
-				  +	" where (p.C_caja ||p.turno)::text = "+DB.TO_STRING(c_caja+turno) + " and pt.BSCA_IsNotPaySummary = 'Y' and p.c_sucursal = "+DB.TO_STRING(c_sucursal) + " and bsca_isimported = false)";
+		sql = "select r.TaxAmt,r.grandTotal,r.datenew,t.status,t.bsca_fiscaldocumentno ,t.bsca_machinefiscalnumber,\n" + 
+				" t.ticketid, t.id, c.taxid, c.address, c.\"name\" \n" + 
+				" FROM pos.tickets t\n" + 
+				" JOIN pos.receipts r ON r.id = t.id \n" + 
+				" join pos.customers c  on t.customer  = c.id \n" + 
+				" where\n" + 
+				" r.money = '"+closedcash_ID+"' and \n" + 
+				" r.bsca_isimported = false and r.orgvalue  = '"+orgValue+"' and \n and t.tickettype = " +ticketType + 
+				" and t.id not in (select t.id from pos.tickets t \n" + 
+				" join pos.receipts r on t.id = r.id \n" + 
+				" join pos.payments p on p.receipt  = t.id \n" + 
+				" JOIN C_POSTenderType pt ON pt.c_postendertype_id = p.bsca_postendertype_id::numeric \n" + 
+				" where r.bsca_isimported  = false and r.orgvalue  ='"+orgValue+"' and pt.BSCA_IsNotPaySummary = 'Y')\n";
 		
 		pstmt = DB.prepareStatement(sql, null);
 		try {
 			rs = pstmt.executeQuery();
 			while(rs.next()){
 				BSCA_Tickets ma_Pagos = new BSCA_Tickets();							
-				ma_Pagos.setC_sucursal(c_sucursal);
-				ma_Pagos.setN_impuesto(rs.getString("n_impuesto"));
-				ma_Pagos.setN_total( rs.getString("n_total"));
-				ma_Pagos.setCu_documentostellar( rs.getString("cu_documentostellar"));
-				ma_Pagos.setCs_documento_rel(rs.getString("cs_documento_rel"));
-				ma_Pagos.setCu_documentofiscal(rs.getString("cu_documentofiscal"));
-				ma_Pagos.setCu_serialimpresora(rs.getString("cu_serialimpresora"));
-				ma_Pagos.setF_fecha(rs.getTimestamp("f_fecha"));
-				ma_Pagos.setC_numero(rs.getString("C_numero"));
-				ma_Pagos.setId(rs.getInt("id"));
-				ma_Pagos.setC_rif(rs.getString("c_rif"));
-				ma_Pagos.setCu_direccion_cliente(rs.getString("cu_direccion_cliente"));
-				ma_Pagos.setC_desc_cliente(rs.getString("c_desc_cliente"));
+				ma_Pagos.setOrgValue(orgValue);
+				ma_Pagos.setTaxAmt(rs.getString("TaxAmt"));
+				ma_Pagos.setGrandTotal(rs.getString("grandTotal"));
+				ma_Pagos.setTicketid( rs.getInt("ticketid"));
+				ma_Pagos.setRefundTicketID(rs.getInt("status"));
+				ma_Pagos.setFiscaldocumentno(rs.getString("bsca_fiscaldocumentno"));
+				ma_Pagos.setMachinefiscalnumber(rs.getString("bsca_machinefiscalnumber"));
+				ma_Pagos.setDate(rs.getTimestamp("datenew"));
+				ma_Pagos.setId(rs.getString("id"));
+				ma_Pagos.setTaxid(rs.getString("taxid"));
+				ma_Pagos.setCustomerAddress(rs.getString("address"));
+				ma_Pagos.setCustomerName(rs.getString("name"));
+				lstMA_Pagos.add(ma_Pagos);
+				
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		
+		return lstMA_Pagos;
+	}
+	
+	public static List<BSCA_Tickets> getTicketsDetaillPaySummary(String closedcash_ID, String orgValue, int ticketType){
+		ResultSet rs = null;
+		PreparedStatement pstmt = null;
+		
+		List<BSCA_Tickets> lstMA_Pagos = new ArrayList<BSCA_Tickets>();
+		 
+		String sql = "select r.TaxAmt,r.grandTotal,r.datenew,t.status,t.bsca_fiscaldocumentno ,t.bsca_machinefiscalnumber,\n" + 
+				" t.ticketid, t.id, c.taxid, c.address, c.\"name\" \n" + 
+				" FROM pos.tickets t\n" + 
+				" JOIN pos.receipts r ON r.id = t.id \n" + 
+				" join pos.customers c  on t.customer  = c.id \n" + 
+				" where\n" + 
+				" r.money = '"+closedcash_ID+"' and \n" + 
+				" r.bsca_isimported = false and r.orgvalue  = '"+orgValue+"' and \n" + 
+				" and t.tickettype = "+ticketType;
+		
+		pstmt = DB.prepareStatement(sql, null);
+		try {
+			rs = pstmt.executeQuery();
+			while(rs.next()){
+				BSCA_Tickets ma_Pagos = new BSCA_Tickets();							
+				ma_Pagos.setOrgValue(orgValue);
+				ma_Pagos.setTaxAmt(rs.getString("TaxAmt"));
+				ma_Pagos.setGrandTotal(rs.getString("grandTotal"));
+				ma_Pagos.setTicketid( rs.getInt("ticketid"));
+				ma_Pagos.setRefundTicketID(rs.getInt("status"));
+				ma_Pagos.setFiscaldocumentno(rs.getString("bsca_fiscaldocumentno"));
+				ma_Pagos.setMachinefiscalnumber(rs.getString("bsca_machinefiscalnumber"));
+				ma_Pagos.setDate(rs.getTimestamp("datenew"));
+				ma_Pagos.setId(rs.getString("id"));
+				ma_Pagos.setTaxid(rs.getString("taxid"));
+				ma_Pagos.setCustomerAddress(rs.getString("address"));
+				ma_Pagos.setCustomerName(rs.getString("name"));
 				lstMA_Pagos.add(ma_Pagos);
 				
 			}
@@ -201,8 +268,8 @@ public class BSCA_Tickets {
 		
 		List<BSCA_Tickets> lst = new ArrayList<BSCA_Tickets>();	
 				
-		String sql = "select t.*, r.datenew FROM tickets t "
-					+"JOIN receipts r ON r.id = t.id "
+		String sql = "select t.*, r.datenew FROM pos.tickets t "
+					+"JOIN pos.receipts r ON r.id = t.id "
 					+"where r.money = ?";
 		try {
 			pstmt = DB.prepareStatement(sql, null);
@@ -238,8 +305,8 @@ public class BSCA_Tickets {
 			PreparedStatement pstmt = null;
 			
 			List<BSCA_TickeLines> lst = new ArrayList<BSCA_TickeLines>();	
-			String sql = "Select tl.*,p.code FROM ticketlines tl "
-					+ "JOIN Products p ON tl.product = p.id "
+			String sql = "Select tl.*,p.code FROM pos.ticketlines tl "
+					+ "JOIN pos.Products p ON tl.product = p.id "
 					+ "where tl.ticket = ?";
 			try {
 				pstmt = DB.prepareStatement(sql, null);
@@ -254,7 +321,8 @@ public class BSCA_Tickets {
 					ticketLines.setUnits(rs.getString("units"));
 					ticketLines.setPrice(rs.getString("price"));
 					ticketLines.setTaxid(rs.getString("taxid"));
-					ticketLines.setProductCode(rs.getString("productCode"));		
+					ticketLines.setBsca_productValue(rs.getString("productCode"));
+					ticketLines.setProductCode(rs.getString("code"));
 					lst.add(ticketLines);
 				}
 			} catch (SQLException e) {
@@ -274,7 +342,7 @@ public class BSCA_Tickets {
 			PreparedStatement pstmt = null;
 			
 			List<BSCA_Payments> lst = new ArrayList<BSCA_Payments>();	
-			String sql = "Select * FROM payments where receipt = ?";
+			String sql = "Select * FROM pos.payments where receipt = ?";
 			try {
 				pstmt = DB.prepareStatement(sql, null);
 				pstmt.setString(1, getId());
@@ -292,6 +360,7 @@ public class BSCA_Tickets {
 					payment.setTendered(rs.getString("tendered"));
 					payment.setCardname(rs.getString("cardName"));
 					payment.setVoucher(rs.getString("voucher"));
+					payment.setBsca_postendertype_id(rs.getString("bsca_postendertype_id"));
 					lst.add(payment);
 				}
 			} catch (SQLException e) {
@@ -305,6 +374,175 @@ public class BSCA_Tickets {
 			
 			return lst;
 		}
+	 
+	 public List<BSCA_TickeLines> getListSummaryTicketsLine(){
+			ResultSet rs = null;
+			PreparedStatement pstmt = null;
+			
+			List<BSCA_TickeLines> lstTicketsLine = new ArrayList<BSCA_TickeLines>();		
+			
+			String sql = "select tl.productcode, sum(tl.units) as units, tl.price,t2.idempiere_id as taxid, \n" + 
+					"MIN(r.datenew) as dateNew\n" + 
+					"from pos.ticketlines tl \n" +
+				    "join pos.receipts r on r.id = tl.ticket " + 
+					"join pos.tickets t on t.id = r.id \n" + 
+					"join pos.taxes t2 on tl.taxid  = t2.id "+
+					"where t.tickettype  = 0 and t.id = '"+id+"' and r.bsca_isimported = false and r.orgvalue = '"+orgValue+"'\n" + 
+					"and   t.id not in (select t.id from pos.tickets t \n" + 
+					" join pos.receipts r on t.id = r.id \n" + 
+					" join pos.payments p on p.receipt  = t.id \n" + 
+					" JOIN C_POSTenderType pt ON pt.c_postendertype_id = p.bsca_postendertype_id::numeric \n" + 
+					" where r.bsca_isimported  = false and r.orgvalue  ='"+orgValue+"'  and pt.BSCA_IsNotPaySummary = 'Y')\n" + 
+					"group by  tl.productcode, tl.price, t2.idempiere_id \n" + 
+					" \n";
+
+			try { 
+				pstmt = DB.prepareStatement(sql, null);
+				rs = pstmt.executeQuery();
+				while(rs.next()){
+					BSCA_TickeLines ticketLine = new BSCA_TickeLines();
+					ticketLine.setUnits(rs.getString("units"));
+					ticketLine.setPrice(rs.getString("price"));
+					ticketLine.setTaxid(rs.getString("taxid"));
+					ticketLine.setPOSDate(rs.getTimestamp("dateNew"));
+					ticketLine.setProductCode(rs.getString("productcode"));
+					lstTicketsLine.add(ticketLine);
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			finally{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
+			
+			return lstTicketsLine;
+		}
+	 
+	 public List<BSCA_Payments> getListSummaryPayments(){
+			ResultSet rs = null;
+			PreparedStatement pstmt = null;
+			
+			List<BSCA_Payments> lstPayments = new ArrayList<BSCA_Payments>();	
+			
+			String sql = " select bsca_postendertype_id,multiplyrate, sum(p.total) as total\n" + 
+					" from pos.payments p \n" + 
+					" join pos.receipts r on r.id = p.receipt\n" + 
+					" where r.bsca_isimported = false and p.receipt  = '"+id+"' and r.orgvalue  = '"+orgValue+"' \n" + 
+					" and   r.id not in (select r.id from pos.receipts r \n" + 
+					" join pos.payments p on p.receipt  = r.id \n" + 
+					" JOIN C_POSTenderType pt ON pt.c_postendertype_id = p.bsca_postendertype_id::numeric \n" + 
+					" where r.bsca_isimported  = false and r.orgvalue  ='"+orgValue+"'  and pt.BSCA_IsNotPaySummary = 'Y')\n" + 
+					" group by bsca_postendertype_id,multiplyrate\n";
+			try {
+				pstmt = DB.prepareStatement(sql, null);
+				rs = pstmt.executeQuery();
+				while(rs.next()){
+					BSCA_Payments payment = new BSCA_Payments();
+					
+					payment.setTotal(rs.getString("total"));	
+					payment.setBsca_postendertype_id(rs.getString("bsca_postendertype_id"));
+					payment.setMultiplyrate(rs.getString("multiplyrate"));
+					lstPayments.add(payment);
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			finally{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}
+			
+			return lstPayments;
+		}
+	 
+	 public List<BSCA_SummaryTax> getListSummaryTax(){
+			ResultSet rs = null;
+			PreparedStatement pstmt = null;
+			
+			List<BSCA_SummaryTax> lstsummaryTax = new ArrayList<BSCA_SummaryTax>();		
+			
+			String sql = "select sum(tl.linenetamt) as linenetamt, sum(tl.pricetax) as pricetax, \n" + 
+					"sum(tl.linenetamt + tl.pricetax) as total, t2.idempiere_ID  "+
+				     "from pos.ticketlines tl\n" + 
+					"join pos.tickets t on tl.ticket = t.id \n" + 
+					"join pos.receipts r on r.id = t.id \n" + 
+					"join pos.taxes t2 on tl.taxid  = t2.id "+
+					" where r.bsca_isimported = false and p.receipt  = '"+id+"' and r.orgvalue  = '"+orgValue+"' \n" + 
+					"group by  t2.idempiere_ID\n";
+
+			try { 
+				pstmt = DB.prepareStatement(sql, null);
+				rs = pstmt.executeQuery();
+				while(rs.next()){
+					BSCA_SummaryTax summaryTax = new BSCA_SummaryTax();
+					summaryTax.setLineNetAmt(rs.getString("linenetamt"));
+					summaryTax.setPriceTax(rs.getString("pricetax"));
+					summaryTax.setTax_ID(rs.getString("taxid"));
+					summaryTax.setTotal(rs.getString("total"));
+					lstsummaryTax.add(summaryTax);
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			finally{
+				DB.close(rs, pstmt);
+				rs = null;
+				pstmt = null;
+			}		
+			return lstsummaryTax;
+		}
+	 
+	public String getOrgValue() {
+		return orgValue;
+	}
+	public void setOrgValue(String orgValue) {
+		this.orgValue = orgValue;
+	}
+	public String getTaxAmt() {
+		return taxAmt;
+	}
+	public void setTaxAmt(String taxAmt) {
+		this.taxAmt = taxAmt;
+	}
+	public String getGrandTotal() {
+		return grandTotal;
+	}
+	public void setGrandTotal(String grandTotal) {
+		this.grandTotal = grandTotal;
+	}
+	public String getFiscaldocumentno() {
+		return fiscaldocumentno;
+	}
+	public void setFiscaldocumentno(String fiscaldocumentno) {
+		this.fiscaldocumentno = fiscaldocumentno;
+	}
+	public String getMachinefiscalnumber() {
+		return machinefiscalnumber;
+	}
+	public void setMachinefiscalnumber(String machinefiscalnumber) {
+		this.machinefiscalnumber = machinefiscalnumber;
+	}
+	public String getTaxid() {
+		return taxid;
+	}
+	public void setTaxid(String taxid) {
+		this.taxid = taxid;
+	}
+	public String getCustomerAddress() {
+		return customerAddress;
+	}
+	public void setCustomerAddress(String custotmerAddress) {
+		this.customerAddress = custotmerAddress;
+	}
+	public String getCustomerName() {
+		return customerName;
+	}
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
 
 
 }

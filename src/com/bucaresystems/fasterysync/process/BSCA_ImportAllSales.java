@@ -9,7 +9,7 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 
-public class BSCA_ImportAllSales extends BSCA_ImportDetaillSales{
+public class BSCA_ImportAllSales extends BSCA_ImportSummarySales{
 	private int p_AD_Org_ID;
 	private List<PO> lstPara;
 	protected Integer p_LIMIT;

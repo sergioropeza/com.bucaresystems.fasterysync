@@ -1,14 +1,13 @@
 package com.bucaresystems.fasterysync.process;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import org.compiere.db.Database;
@@ -29,7 +28,6 @@ import org.compiere.model.X_C_POSPayment;
 import org.compiere.model.X_C_POSTenderType;
 import org.compiere.process.DocAction;
 import org.compiere.process.ProcessInfoParameter;
-import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
@@ -39,6 +37,10 @@ import com.bucaresystems.fasterysync.base.CustomProcess;
 import com.bucaresystems.fasterysync.model.X_BSCA_POSDetaill;
 import com.bucaresystems.fasterysync.model.X_BSCA_POSTaxDetaill;
 import com.bucaresystems.fasterysync.pos.model.BSCA_ClosedCash;
+import com.bucaresystems.fasterysync.pos.model.BSCA_Payments;
+import com.bucaresystems.fasterysync.pos.model.BSCA_SummaryTax;
+import com.bucaresystems.fasterysync.pos.model.BSCA_Tax;
+import com.bucaresystems.fasterysync.pos.model.BSCA_TickeLines;
 import com.bucaresystems.fasterysync.pos.model.BSCA_Tickets;
 
 public class BSCA_ImportSummarySales extends CustomProcess{
@@ -117,11 +119,11 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 
 	@Override
 	protected String doIt() throws Exception {
-		return importSummaryOrders();
+		return importOrders();
 	
 	}
 	
-	protected String importSummaryOrders() {
+	protected String importOrders() {
 		if (trxName==null){
 			trxName = get_TrxName();	
 			trx = Trx.get(trxName, false);
@@ -151,11 +153,10 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						if (c_caja==null || DocumentNo ==null)
 							continue forRoutes;
 						
-						String turno = DocumentNo.replaceFirst(c_caja, "");
 						String closedCash = route.get_ValueAsString("BSCA_Route_UU");
 						
 			            //// VALIDA QUE TODOS LOS REGISTROS DE MA_PAGOS SE HAYAN SINCRONIZADO /////////////////////////
-						if (!isAllMA_PagosSync(route,c_sucursal))
+						if (!isAllSales(closedCash,c_sucursal))
 							continue forRoutes;					
 						
 						importOrdersNotSummary(closedCash,BSCA_Route_ID, C_BankAccount_ID, c_sucursal);
@@ -203,6 +204,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					String minDocStellar =tickets.getTicketid()+"";
 					Timestamp f_fecha = tickets.getDate();
 					int c_concepto = tickets.getTickettype();
+					int ticketType = tickets.getTickettype();
 					
 					Integer order_ID =-1;
 					
@@ -236,23 +238,22 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					order.saveEx();	
 					log.warning("Orden estelar: "+documentNo);
 					
-					createPOSDetaillSummay(c_sucursal, c_caja, turno, f_fecha, c_concepto, order);
+					createPOSDetaillSummay( closeCash_ID,  orgValue,  ticketType, order);
 					
-					List<BSCA_MA_Transaccion> lstTransaccion = bsca_Ma_Pagos.getListSummaryMA_Transaccion(DocumentNo, f_fecha);
+					List<BSCA_TickeLines> lstTicketLines = tickets.getListSummaryTicketsLine();
 					MPriceList priceList = new MPriceList(Env.getCtx(), M_PriceList_ID, trxName);
 	
-	transaccion:for (BSCA_MA_Transaccion ma_Transaccion : lstTransaccion) {
-						String valueProduct = ma_Transaccion.getCod_Principal();
+	transaccion:for (BSCA_TickeLines ticketLine : lstTicketLines) {
+						String valueProduct = ticketLine.getProductCode();
 //						String BSCA_ValuePOS = ma_Transaccion.getCodigo();
-						BigDecimal cantidad =  new BigDecimal(ma_Transaccion.getCantidad());
-						BigDecimal price = new BigDecimal(ma_Transaccion.getPrecio()).setScale(order.getPrecision(), BigDecimal.ROUND_HALF_UP);
-						String  impuesto1 = ma_Transaccion.getImpuesto1();
-						Timestamp POSDate = ma_Transaccion.getPOSDate();
-						c_concepto =bsca_Ma_Pagos.getC_concepto();
+						BigDecimal cantidad =  new BigDecimal(ticketLine.getUnits());
+						BigDecimal price = new BigDecimal(ticketLine.getPrice()).setScale(order.getPrecision(), RoundingMode.HALF_UP);
+						String  taxID = ticketLine.getTaxid();
+						Timestamp POSDate = ticketLine.getPOSDate();
 						int M_Product_ID = p_M_Product_ID;
 						String descriptionLine = "";
 						BigDecimal Qty = Env.ZERO;
-						if (c_concepto.equals("DEV")){
+						if (BSCA_Tickets.RECEIPT_REFUND==ticketType){
 							if (!isQtyNegate)
 								Qty = cantidad.negate();
 							else 
@@ -287,23 +288,14 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 							
 						MProduct mProduct = new MProduct(getCtx(), M_Product_ID, trxName);
 						
-						MTax tax = getTax(impuesto1, mProduct.getC_TaxCategory_ID());	
-						int C_Tax_ID = 0;
-						if (tax == null){
-							descriptionLine+=" ERROR: Impuesto con tasa "+impuesto1+ " no está registrado o no está asignado al Producto "+mProduct.getName();
-							tax = getTax(impuesto1,p_C_TaxCategory_ID);
-							if (tax==null){
-								log.severe("ERROR: Tasa de impuesto  "+impuesto1+ " no está registrado en la categoria de impuesto DEFAULT. Factura "+ documentNo +" no Importada");
-								trx.rollback(savePoint);
-								break transaccion;
-							}else
-								C_Tax_ID = tax.get_ID();
-						}
-	
+			
+						int C_Tax_ID = Integer.parseInt(taxID);
+						BSCA_Tax tax = new BSCA_Tax(getCtx(), C_Tax_ID, trxName);
+						
 						BigDecimal PurchaseAmt = getPurchaseAmt(M_Product_ID, POSDate,AD_Org_ID);
 						BigDecimal Price = Env.ZERO;
 						MOrderLine orderLine = new MOrderLine(order);
-						orderLine.setQty(Qty.setScale(mProduct.getC_UOM().getStdPrecision(), BigDecimal.ROUND_HALF_UP));
+						orderLine.setQty(Qty.setScale(mProduct.getC_UOM().getStdPrecision(), RoundingMode.HALF_UP));
 						C_Tax_ID = tax.get_ID();
 						if(priceList.isTaxIncluded()){
 							BigDecimal imp=tax.calculateTax(price.abs(), false, order.getPrecision(), order, orderLine);
@@ -327,23 +319,24 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					
 					BigDecimal totalPOSPayments = Env.ZERO; 
 	
-					if (!c_concepto.equals("DEV"))  {
+					if (BSCA_Tickets.RECEIPT_REFUND!=ticketType){
 						// sincroniza los tipos de pagos
-						List<BSCA_MA_DetallePago> listMA_DetallePago = bsca_Ma_Pagos.getListSummaryMA_DetallePago(DocumentNo,f_fecha);
+						List<BSCA_Payments> listPayments = tickets.getListSummaryPayments();
 						
-						for (BSCA_MA_DetallePago bsca_MA_DetallePago : listMA_DetallePago) {
-							String valueTenderType =bsca_MA_DetallePago.getC_coddenominacion();
-							String n_monto =bsca_MA_DetallePago.getN_monto();
-							String c_codmoneda = bsca_MA_DetallePago.getC_codmoneda();
+						for (BSCA_Payments payment : listPayments) {
+
+							String n_monto =payment.getTotal();
 							BigDecimal n_monto2 = new BigDecimal(n_monto);
-							BigDecimal PayAmt =  n_monto2.setScale(priceList.getPricePrecision(), BigDecimal.ROUND_HALF_UP);
-							BigDecimal MultiplyRate = new BigDecimal(bsca_MA_DetallePago.getN_factor());
-							X_C_POSTenderType tenderType = getPOSTenderType(valueTenderType,c_codmoneda);
+							BigDecimal PayAmt =  n_monto2.setScale(priceList.getPricePrecision(), RoundingMode.HALF_UP);
+							BigDecimal MultiplyRate = new BigDecimal(payment.getMultiplyrate());
+							int C_POSTenderType_ID = Integer.parseInt(payment.getBsca_postendertype_id());
+							
 							BigDecimal BSCA_QtyCurrency = Env.ZERO;
 							if  (MultiplyRate!=null || !Env.ZERO.equals(MultiplyRate))
-								BSCA_QtyCurrency = PayAmt.divide(MultiplyRate,2,BigDecimal.ROUND_UP);
+								BSCA_QtyCurrency = PayAmt.divide(MultiplyRate,2,RoundingMode.HALF_UP);
 							
-							if (tenderType!=null){
+							if (C_POSTenderType_ID!=0){
+								X_C_POSTenderType tenderType = new X_C_POSTenderType(getCtx(), C_POSTenderType_ID, trxName);
 								X_C_POSPayment posPayment = new X_C_POSPayment(getCtx(), 0, trxName);
 								posPayment.setC_POSTenderType_ID(tenderType.get_ID());
 								posPayment.setTenderType(tenderType.getTenderType());
@@ -358,7 +351,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 								
 								totalPOSPayments = totalPOSPayments.add(PayAmt);
 							}else{
-								log.severe("No hay un registro en POSTenderType con codigo = "+valueTenderType+ " y moneda "+c_codmoneda);
+								log.severe("No hay un registro en POSTenderType con ID = "+C_POSTenderType_ID);
 								trx.rollback(savePoint);
 								continue forPagos;
 							}
@@ -366,13 +359,13 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					}
 				
 					BigDecimal granTotal = DB.getSQLValueBDEx(order.get_TrxName(),"Select GrandTotal from C_Order where C_Order_ID= " +order.get_ID());
-					if (!c_concepto.equals("DEV")){
+					if (BSCA_Tickets.RECEIPT_REFUND==ticketType){
 																		
 						if (totalPOSPayments.compareTo(granTotal) != 0){
 							BigDecimal diff = totalPOSPayments.subtract(granTotal);
 							MOrderLine orderLine = new MOrderLine(order);
 							orderLine.setQty(Env.ONE);
-							orderLine.setPrice(diff.setScale(priceList.getPricePrecision(), BigDecimal.ROUND_HALF_UP)); 
+							orderLine.setPrice(diff.setScale(priceList.getPricePrecision(), RoundingMode.HALF_UP)); 
 							orderLine.setC_Charge_ID(C_Charge_ID);	
 							orderLine.set_ValueOfColumn("BSCA_Route_ID", BSCA_Route_ID);
 							orderLine.saveEx();
@@ -386,7 +379,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 							X_C_POSPayment posPayment = new X_C_POSPayment(getCtx(), 0, trxName);
 								posPayment.setC_POSTenderType_ID(tenderType.get_ID());
 								posPayment.setTenderType(tenderType.getTenderType());
-								posPayment.setPayAmt(granTotal.negate().setScale(priceList.getPricePrecision(), BigDecimal.ROUND_HALF_UP));
+								posPayment.setPayAmt(granTotal.negate().setScale(priceList.getPricePrecision(), RoundingMode.HALF_UP));
 								posPayment.setC_Order_ID(order.get_ID());
 								posPayment.set_ValueOfColumn("C_BankAccount_ID", C_BankAccount_ID);
 								posPayment.setAD_Org_ID(order.getAD_Org_ID());
@@ -441,62 +434,42 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 		}// FOR PAGOS	
 	}
 
-	private boolean isAllMA_PagosSync(PO route, String c_sucursal) {
+	private boolean isAllSales(String closedCash_ID, String orgValue) {
 		
-	
-		String DocumentNo = route.get_ValueAsString("DocumentNo");
-		String queryQty = " Select count(*) as Qty "
-						+" FROM MA_Pagos p"
-						+" JOIN ma_documentos_fiscal df ON df.cu_documentostellar = p.c_numero And p.c_sucursal = df.cu_localidad and cu_documentoTipo = p.C_concepto "
-						+" where  (p.C_caja ||p.turno)::text = "+DB.TO_STRING(DocumentNo)
-						+" and p.C_sucursal = "+DB.TO_STRING(c_sucursal)+" and p.c_concepto = 'VEN' group by p.C_sucursal,p.C_caja, p.turno "
-						+" order by p.C_caja";
-		
-		int qtyOrders = DB.getSQLValueEx(trxName, queryQty);
-		if (qtyOrders==-1)
-			qtyOrders=0;
-		
-		String StellarQtySales = route.get_ValueAsString("BSCA_StellarQtySales");
-		if (StellarQtySales!=null && !"".equals(StellarQtySales)){
-			int stellarQty = Integer.parseInt(StellarQtySales);
-			if ( qtyOrders!=stellarQty){
-				log.severe("La Cantidad Venta Stellar("+StellarQtySales+") y El numero de ventas a importar ("+qtyOrders+") no coinciden ");
-				return false;
-			}
-		}
-		
-		return true;
+		Timestamp dateEnd = DB.getSQLValueTS(trxName, "select dateend from pos.closedcash c where id = '"+closedCash_ID+"' and orgvalue = '"+orgValue+"'");
+		return dateEnd !=null;
 	}
 
-	private void createPOSDetaillNotSummary( String c_sucursal, String c_concepto,String c_numero,BSCA_MOrder order){
-		List<BSCA_MA_Pagos> lstMA_Pagos = BSCA_MA_Pagos.getLstMA_PagosPOSDetaillNotSummary(c_sucursal, c_concepto, c_numero);
-		createPOSDetaill(lstMA_Pagos,order,c_concepto);
+	private void createPOSDetaillNotSummary( String closedcash_ID, String orgValue, int ticketType,MOrder order){
+		List<BSCA_Tickets> lstMA_Pagos = BSCA_Tickets.getTicketsDetaillPaySummary(closedcash_ID, orgValue, ticketType);
+		createPOSDetaill(lstMA_Pagos,order,ticketType);
 	}
 	
 	
-	private void createPOSDetaillSummay( String c_sucursal, String c_caja, String turno,Timestamp f_fecha, String c_concepto,BSCA_MOrder order){
-		List<BSCA_MA_Pagos> lstMA_Pagos = BSCA_MA_Pagos.getLstMA_PagosPOSDetaillSummary(c_sucursal, c_caja, turno, f_fecha, c_concepto);
-		createPOSDetaill(lstMA_Pagos,order,c_concepto);
+	private void createPOSDetaillSummay( String closedcash_ID, String orgValue, int ticketType,MOrder order){
+		List<BSCA_Tickets> lstTickets = BSCA_Tickets.getTicketsDetaillNotPaySummary(closedcash_ID, orgValue, ticketType);
+		createPOSDetaill(lstTickets,order,ticketType);
 		
 	
 	}
 
-	private void createPOSDetaill(List<BSCA_MA_Pagos> lstMA_Pagos, BSCA_MOrder order, String c_concepto){
-		for (BSCA_MA_Pagos bsca_Ma_Pagos : lstMA_Pagos) {			
+	private void createPOSDetaill(List<BSCA_Tickets> lstTickets, MOrder order, int ticketType){
+			
+		lstTickets.forEach(ticket-> {	
 				
-				String cs_documento_rel = bsca_Ma_Pagos.getCs_documento_rel();
-				String cu_documentofiscal = bsca_Ma_Pagos.getCu_documentofiscal();
-				String cu_serialimpresora = bsca_Ma_Pagos.getCu_serialimpresora();
-				String c_numero = bsca_Ma_Pagos.getC_numero();
-				String c_sucursal = bsca_Ma_Pagos.getC_sucursal();
-				String c_rif = bsca_Ma_Pagos.getC_rif();
-				String c_desc_cliente =bsca_Ma_Pagos.getC_desc_cliente();
-				String cu_direccion_cliente = bsca_Ma_Pagos.getCu_direccion_cliente();
+				int cs_documento_rel = ticket.getTicketRefundID();
+				String cu_documentofiscal = ticket.getFiscaldocumentno();
+				String cu_serialimpresora = ticket.getMachinefiscalnumber();
+				int c_numero = ticket.getTicketid();
+				String c_sucursal = ticket.getOrgValue();
+				String c_rif = ticket.getTaxid();
+				String c_desc_cliente =ticket.getCustomerName();
+				String cu_direccion_cliente = ticket.getCustomerAddress();
 				
-				int id= bsca_Ma_Pagos.getId();
+				String id= ticket.getId();
 				
-				BigDecimal n_impuesto =  new BigDecimal(bsca_Ma_Pagos.getN_impuesto()).setScale(order.getPrecision(), BigDecimal.ROUND_HALF_UP);
-				BigDecimal n_total = new BigDecimal(bsca_Ma_Pagos.getN_total()).setScale(order.getPrecision(), BigDecimal.ROUND_HALF_UP);
+				BigDecimal n_impuesto =  new BigDecimal(ticket.getTaxAmt()).setScale(order.getPrecision(), RoundingMode.HALF_UP);
+				BigDecimal n_total = new BigDecimal(ticket.getGrandTotal()).setScale(order.getPrecision(), RoundingMode.HALF_UP);
 				Boolean  BSCA_isTaxPayer = false;
 				if(c_rif!=null){
 					c_rif=c_rif.toUpperCase().replaceAll("[^VEJGP0-9]", "");
@@ -507,7 +480,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 				
 				BigDecimal TaxAmtOrder = Env.ZERO;
 				BigDecimal GrandTotal = Env.ZERO;
-				if (c_concepto.equals("DEV")){
+				if (BSCA_Tickets.RECEIPT_REFUND==ticketType){
 					if (!isQtyNegate){
 						TaxAmtOrder = n_impuesto.negate();
 						GrandTotal = n_total.negate();
@@ -528,9 +501,9 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 				posDetaill.setGrandTotal(GrandTotal);
 				
 				posDetaill.setBSCA_FiscalDocumentNo(cu_documentofiscal);
-				posDetaill.setBSCA_Pos_invoiceaffected(cs_documento_rel);
+				posDetaill.setBSCA_Pos_invoiceaffected(cs_documento_rel+"");
 				posDetaill.setFiscalPrinterSerial(cu_serialimpresora);
-				posDetaill.setBSCA_StellarDocumento(c_numero);
+				posDetaill.setBSCA_StellarDocumento(c_numero+"");
 				posDetaill.setBSCA_StellarRif(c_rif);
 				posDetaill.setClientName(c_desc_cliente);
 				posDetaill.setLocationName(cu_direccion_cliente);
@@ -538,14 +511,15 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 				posDetaill.saveEx();	
 				
 				
-				List<BSCA_MA_SummaryTax> lstSummaryTax = bsca_Ma_Pagos.getListSummaryTax(c_concepto, c_sucursal);
-				for (BSCA_MA_SummaryTax bsca_MA_SummaryTax : lstSummaryTax) {
+				List<BSCA_SummaryTax> lstSummaryTax = ticket.getListSummaryTax();
+				for (BSCA_SummaryTax bsca_MA_SummaryTax : lstSummaryTax) {
 					
-					int C_Tax_ID = DB.getSQLValueEx(trxName, " select C_Tax_ID FROM  C_Tax where rate = ? And C_TaxCategory_ID = ? and isActive = 'Y'",bsca_MA_SummaryTax.getRate(), p_C_TaxCategory_ID );
-					BigDecimal TaxBaseAmt = bsca_MA_SummaryTax.getTaxBaseAmt().setScale(order.getPrecision(), BigDecimal.ROUND_HALF_UP);			
-					BigDecimal TaxAmt = bsca_MA_SummaryTax.getTaxAmt().setScale(order.getPrecision(), BigDecimal.ROUND_HALF_UP);
+					int C_Tax_ID = Integer.parseInt(bsca_MA_SummaryTax.getTax_ID());
+					MTax tax = new MTax(getCtx(), C_Tax_ID, trxName);
+					BigDecimal TaxBaseAmt = new BigDecimal(bsca_MA_SummaryTax.getLineNetAmt()).setScale(order.getPrecision(), RoundingMode.HALF_UP);			
+					BigDecimal TaxAmt = new BigDecimal(bsca_MA_SummaryTax.getPriceTax()).setScale(order.getPrecision(), RoundingMode.HALF_UP);
 //					MTax tax = MTax.get(getCtx(), C_Tax_ID);
-//					BigDecimal TaxAmt = tax.calculateTax(TaxBaseAmt, false, order.getPrecision()).setScale(order.getPrecision(), BigDecimal.ROUND_HALF_UP);
+//					BigDecimal TaxAmt = tax.calculateTax(TaxBaseAmt, false, order.getPrecision()).setScale(order.getPrecision(), RoundingMode.HALF_UP);
 					
 					X_BSCA_POSTaxDetaill posTaxDetaill = new X_BSCA_POSTaxDetaill(getCtx(), 0, get_TrxName());
 					posTaxDetaill.setBSCA_POSDetaill_ID(posDetaill.get_ID());
@@ -553,43 +527,44 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					posTaxDetaill.setC_Tax_ID(C_Tax_ID);
 					posTaxDetaill.setTaxAmt(TaxAmt);
 					posTaxDetaill.setTaxBaseAmt(TaxBaseAmt);
-					posTaxDetaill.setRate(bsca_MA_SummaryTax.getRate());
+					posTaxDetaill.setRate(tax.getRate());
 					posTaxDetaill.saveEx();
 						
 				}
 				
 				DB.executeUpdateEx("Update MA_Pagos set bsca_isimported = true where id ="+id +" and C_sucursal = "+DB.TO_STRING(c_sucursal), trx.getTrxName());
-			}
+		});	
 	}
-	private void importOrdersNotSummary(int BSCA_Route_ID,int C_BankAccount_ID, String c_sucursal, String c_caja, String turno){
+	private void importOrdersNotSummary(String closeCash_ID, int BSCA_Route_ID,int C_BankAccount_ID,String orgValue){
 
 		int seq= 0;
 		Savepoint savePoint = null;
-		List<BSCA_MA_Pagos> lstMA_Pagos = BSCA_MA_Pagos.getLstMA_PagosNotSummary(c_sucursal,c_caja, turno);		
-		forPagos: for (BSCA_MA_Pagos bsca_Ma_Pagos : lstMA_Pagos) {
+		List<BSCA_Tickets> lstTickets = BSCA_Tickets.getTicketsNotImported(closeCash_ID);	
+		forPagos: for (BSCA_Tickets ticket : lstTickets) {
 					
 					seq+=10;
 					boolean error = false;
 					try{
 						savePoint = trx.setSavepoint(null);
 						
-						String bPartnerValue = bsca_Ma_Pagos.getC_rif();
-						String documentNo = bsca_Ma_Pagos.getC_numero();
-						String c_desc_cliente =bsca_Ma_Pagos.getC_desc_cliente();
-						String c_concepto =bsca_Ma_Pagos.getC_concepto();
-						String cs_documento_rel = bsca_Ma_Pagos.getCs_documento_rel();
-						Timestamp f_fecha = bsca_Ma_Pagos.getF_fecha();
-						Timestamp POSDate = bsca_Ma_Pagos.getPOSDate();
-						int id = bsca_Ma_Pagos.getId();
+						String bPartnerValue = ticket.getTaxid();
+						String documentNo = orgValue+ticket.getTicketid();
+						String c_desc_cliente =ticket.getCustomerName();
+						int ticketType =ticket.getTickettype();
+						int cs_documento_rel = ticket.getTicketRefundID();
+						Timestamp f_fecha = ticket.getDate();
+						Timestamp POSDate = ticket.getDate();
+						String id = ticket.getId();
+						String taxID = ticket.getTaxid();
 						
 						
-						int DocTypeTarget_ID = c_concepto.equals("DEV")?C_DocTypeTargetNC_ID:C_DocTypeTarget_ID;
-						Integer AD_Org_ID = getAD_Org_ID(c_sucursal);
+						int DocTypeTarget_ID = BSCA_Tickets.RECEIPT_REFUND==ticketType?C_DocTypeTargetNC_ID:C_DocTypeTarget_ID;
+						Integer AD_Org_ID = getAD_Org_ID(orgValue);
 						Integer order_ID =-1;
 						if (AD_Org_ID!=-1)
 							order_ID= getC_Order_IDfromStellarDocumento(documentNo,DocTypeTarget_ID,AD_Org_ID); // verifica si la orden  está registrada
 						if (order_ID!=-1){
-							DB.executeUpdateEx("Update MA_Pagos set bsca_isimported = true where id ="+id +" and C_sucursal = "+DB.TO_STRING(c_sucursal), trx.getTrxName());
+							DB.executeUpdateEx("Update MA_Pagos set bsca_isimported = true where id ="+id +" and C_sucursal = "+DB.TO_STRING(orgValue), trx.getTrxName());
 							continue forPagos;
 						}
 						
@@ -658,16 +633,16 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						
 						int M_Warehouse_ID = 0;
 						if (AD_Org_ID==-1){
-							addLog("ERROR: Organización con código "+c_sucursal+ " no está registrado. Factura "+ documentNo +"no Importada");
-							log.severe("ERROR: Organización con código "+c_sucursal+ " no está registrado. Factura "+ documentNo +"no Importada");
+							addLog("ERROR: Organización con código "+orgValue+ " no está registrado. Factura "+ documentNo +"no Importada");
+							log.severe("ERROR: Organización con código "+orgValue+ " no está registrado. Factura "+ documentNo +"no Importada");
 							error = true;
 							trx.rollback(savePoint);
 							continue forPagos;
 						}else{
 							M_Warehouse_ID =getM_WarehouseOrg_ID(AD_Org_ID);
 							if(M_Warehouse_ID==-1) {
-								addLog("ERROR: La Organización "+c_sucursal +" No tiene un almacén configurado. Factura "+documentNo);
-								log.severe("ERROR: La Organización "+c_sucursal +" No tiene un almacén configurado. Factura "+documentNo);
+								addLog("ERROR: La Organización "+orgValue +" No tiene un almacén configurado. Factura "+documentNo);
+								log.severe("ERROR: La Organización "+orgValue +" No tiene un almacén configurado. Factura "+documentNo);
 								trx.rollback(savePoint);
 								continue forPagos;
 							}
@@ -679,7 +654,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						order.setC_BPartner_ID(C_BPartner_ID);
 						order.setIsSOTrx(true);
 						order.setM_Warehouse_ID(M_Warehouse_ID);
-						order.setDocumentNo(c_sucursal+documentNo);
+						order.setDocumentNo(documentNo);
 						order.setC_DocTypeTarget_ID(DocTypeTarget_ID);
 						order.saveEx();	
 						order.setM_PriceList_ID(M_PriceList_ID);
@@ -696,37 +671,36 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						
 						order.setDocAction(DocAction.ACTION_Complete);
 						
-						if (c_concepto.equals("DEV")){
-							Integer orderAffected_ID = getC_Order_ID(cs_documento_rel,AD_Org_ID);
+						if ( BSCA_Tickets.RECEIPT_REFUND==ticketType){
+							Integer orderAffected_ID = getC_Order_ID(orgValue+cs_documento_rel,AD_Org_ID);
 							if (orderAffected_ID!=-1) 
 								order.set_ValueOfColumn("BSCA_OrderAffected_ID", orderAffected_ID);
 						}
 
 						order.set_ValueOfColumn("BSCA_SeqNo", seq);
-						order.set_ValueOfColumn("BSCA_StellarRif", bsca_Ma_Pagos.getC_rif());
-						order.set_ValueOfColumn("BSCA_StellarName", bsca_Ma_Pagos.getC_desc_cliente());
+						order.set_ValueOfColumn("BSCA_StellarRif", taxID);
+						order.set_ValueOfColumn("BSCA_StellarName", c_desc_cliente);
 						order.saveEx();	
 						log.warning("Orden estelar: "+documentNo);
 						log.warning("Tercero: "+bPartnerValue);
 															
-						createPOSDetaillNotSummary(c_sucursal, c_concepto, documentNo, order);
+						createPOSDetaillNotSummary( closeCash_ID,  orgValue,  ticketType, order);
 						
 						//sincroniza las lineas de las ordenes 
 						error = false;
 						MPriceList priceList = new MPriceList(Env.getCtx(), M_PriceList_ID, trxName);
-						List<BSCA_MA_Transaccion> listTransaccion = bsca_Ma_Pagos.getListMA_Transaccion();
+						List<BSCA_TickeLines> lstTicketsLine = ticket.getTicketLines();
 
-						forTransaccion:for (BSCA_MA_Transaccion ma_Transaccion : listTransaccion) {
-							String valueProduct = ma_Transaccion.getCod_Principal();
-							String BSCA_ValuePOS = ma_Transaccion.getCodigo();
-							BigDecimal cantidad =  new BigDecimal(ma_Transaccion.getCantidad());
-							BigDecimal price = new BigDecimal(ma_Transaccion.getPrecio()).setScale(order.getPrecision(), BigDecimal.ROUND_HALF_UP);
-							String  impuesto1 = ma_Transaccion.getImpuesto1();
-							c_concepto =bsca_Ma_Pagos.getC_concepto();
+						forTransaccion:for (BSCA_TickeLines ma_Transaccion : lstTicketsLine) {
+							String valueProduct = ma_Transaccion.getProductCode();
+							String BSCA_ValuePOS = ma_Transaccion.getBsca_productValue();
+							BigDecimal cantidad =  new BigDecimal(ma_Transaccion.getUnits());
+							BigDecimal price = new BigDecimal(ma_Transaccion.getPrice()).setScale(order.getPrecision(), RoundingMode.HALF_UP);
+	
 							int M_Product_ID = p_M_Product_ID;
 							String descriptionLine = "";
 							BigDecimal Qty = Env.ZERO;
-							if (c_concepto.equals("DEV")){
+							if (BSCA_Tickets.RECEIPT_REFUND==ticketType){
 								if (!isQtyNegate)
 									Qty = cantidad.negate();
 								else 
@@ -761,24 +735,14 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 								
 							MProduct mProduct = new MProduct(getCtx(), M_Product_ID, trxName);
 							
-							MTax tax = getTax(impuesto1, mProduct.getC_TaxCategory_ID());	
-							int C_Tax_ID = 0;
-							if (tax == null){
-								descriptionLine+=" ERROR: Impuesto con tasa "+impuesto1+ " no está registrado o no está asignado al Producto "+mProduct.getName();
-								tax = getTax(impuesto1,p_C_TaxCategory_ID);
-								if (tax==null){
-									addLog("ERROR: Tasa de impuesto  "+impuesto1+ " no está registrado en la categoria de impuesto DEFAULT. Factura "+ documentNo +" no Importada");
-									log.severe("ERROR: Tasa de impuesto  "+impuesto1+ " no está registrado en la categoria de impuesto DEFAULT. Factura "+ documentNo +" no Importada");
-									error = true;
-									break forTransaccion;
-								}else
-									C_Tax_ID = tax.get_ID();
-							}
+							
+							int C_Tax_ID = Integer.parseInt(taxID);
+							BSCA_Tax tax = new BSCA_Tax(getCtx(), C_Tax_ID, trxName);
 	
 							BigDecimal PurchaseAmt = getPurchaseAmt(M_Product_ID, POSDate,AD_Org_ID);
 							BigDecimal Price = Env.ZERO;
 							MOrderLine orderLine = new MOrderLine(order);
-							orderLine.setQty(Qty.setScale(mProduct.getC_UOM().getStdPrecision(), BigDecimal.ROUND_HALF_UP));
+							orderLine.setQty(Qty.setScale(mProduct.getC_UOM().getStdPrecision(), RoundingMode.HALF_UP));
 							C_Tax_ID = tax.get_ID();
 							if(priceList.isTaxIncluded()){
 								BigDecimal imp=tax.calculateTax(price.abs(), false, order.getPrecision(), order, orderLine);
@@ -806,24 +770,24 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						}
 						
 						
-						// sincroniza los tipos de pagos
-						List<BSCA_MA_DetallePago> listMA_DetallePago = bsca_Ma_Pagos.getListMA_DetallePago();
 						error = false;
 						BigDecimal totalPOSPayments = Env.ZERO; 
-						if (!c_concepto.equals("DEV"))  {
-							for (BSCA_MA_DetallePago bsca_MA_DetallePago : listMA_DetallePago) {
-								String valueTenderType =bsca_MA_DetallePago.getC_coddenominacion();
-								String n_monto =bsca_MA_DetallePago.getN_monto();
+						
+						if (BSCA_Tickets.RECEIPT_REFUND!=ticketType){
+							// sincroniza los tipos de pagos
+							List<BSCA_Payments> listPayments = ticket.getPaymentLines();
+							
+							for (BSCA_Payments payment : listPayments) {
+				
+								String n_monto =payment.getTotal();
 								BigDecimal n_monto2 = new BigDecimal(n_monto);
-								BigDecimal PayAmt =  n_monto2.setScale(priceList.getPricePrecision(), BigDecimal.ROUND_HALF_UP);
-								String  banco = bsca_MA_DetallePago.getC_banco();
-								String c_numero =bsca_MA_DetallePago.getC_numero();
-								String c_codMoneda = bsca_MA_DetallePago.getC_codmoneda();
-								BigDecimal MultiplyRate = new BigDecimal(bsca_MA_DetallePago.getN_factor());
-								X_C_POSTenderType tenderType = getPOSTenderType(valueTenderType,c_codMoneda);
+								BigDecimal PayAmt =  n_monto2.setScale(priceList.getPricePrecision(), RoundingMode.HALF_UP);
+								BigDecimal MultiplyRate = new BigDecimal(payment.getMultiplyrate());
+								int C_POSTenderType_ID = Integer.parseInt(payment.getBsca_postendertype_id());
+								X_C_POSTenderType tenderType = new X_C_POSTenderType(getCtx(),C_POSTenderType_ID,trxName );
 								BigDecimal BSCA_QtyCurrency = Env.ZERO;
 								if  (MultiplyRate!=null || !Env.ZERO.equals(MultiplyRate))
-									BSCA_QtyCurrency = PayAmt.divide(MultiplyRate,2,BigDecimal.ROUND_UP);
+									BSCA_QtyCurrency = PayAmt.divide(MultiplyRate,2,RoundingMode.HALF_UP);
 																				
 								if (tenderType!=null){
 									X_C_POSPayment posPayment = new X_C_POSPayment(getCtx(), 0, trxName);
@@ -836,7 +800,6 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 									posPayment.setIsPostDated(tenderType.isPostDated());
 									posPayment.set_ValueOfColumn("MultiplyRate", MultiplyRate);
 									posPayment.set_ValueOfColumn("BSCA_QtyCurrency", BSCA_QtyCurrency);
-									posPayment.setHelp(banco + "-" + c_numero);
 									posPayment.saveEx();
 									
 									totalPOSPayments = totalPOSPayments.add(PayAmt);
@@ -853,13 +816,13 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 							continue forPagos;
 						}
 						BigDecimal granTotal = DB.getSQLValueBDEx(order.get_TrxName(),"Select GrandTotal from C_Order where C_Order_ID= " +order.get_ID());
-						if (!c_concepto.equals("DEV")){
+						if (BSCA_Tickets.RECEIPT_REFUND!=ticketType){
 																			
 							if (totalPOSPayments.compareTo(granTotal) != 0){
 								BigDecimal diff = totalPOSPayments.subtract(granTotal);
 								MOrderLine orderLine = new MOrderLine(order);
 								orderLine.setQty(Env.ONE);
-								orderLine.setPrice(diff.setScale(priceList.getPricePrecision(), BigDecimal.ROUND_HALF_UP)); 
+								orderLine.setPrice(diff.setScale(priceList.getPricePrecision(), RoundingMode.HALF_UP)); 
 								orderLine.setC_Charge_ID(C_Charge_ID);	
 								orderLine.set_ValueOfColumn("BSCA_Route_ID", BSCA_Route_ID);
 								orderLine.saveEx();
@@ -871,7 +834,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 								X_C_POSPayment posPayment = new X_C_POSPayment(getCtx(), 0, trxName);
 								posPayment.setC_POSTenderType_ID(tenderType.get_ID());
 								posPayment.setTenderType(tenderType.getTenderType());
-								posPayment.setPayAmt(granTotal.negate().setScale(priceList.getPricePrecision(), BigDecimal.ROUND_HALF_UP));
+								posPayment.setPayAmt(granTotal.negate().setScale(priceList.getPricePrecision(), RoundingMode.HALF_UP));
 								posPayment.setC_Order_ID(order.get_ID());
 								posPayment.set_ValueOfColumn("C_BankAccount_ID", C_BankAccount_ID);
 								posPayment.setAD_Org_ID(order.getAD_Org_ID());
@@ -880,7 +843,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						}
 						
 						MDocType docTarget_ID = (MDocType)order.getC_DocTypeTarget();				
-						DB.executeUpdateEx("Update MA_Pagos set bsca_isimported = true where id ="+id +" and C_sucursal = "+DB.TO_STRING(c_sucursal), trx.getTrxName());	
+						DB.executeUpdateEx("Update MA_Pagos set bsca_isimported = true where id ="+id +" and C_sucursal = "+DB.TO_STRING(orgValue), trx.getTrxName());	
 						
 						if (docTarget_ID.get_ValueAsBoolean("BSCA_IsCompleitOnImport")){
 						
@@ -949,10 +912,8 @@ private void UpdateBSCA_Route(String c_sucursal ){
 		String sql = null;
 		ResultSet rsCaja = null;
 		PreparedStatement pstmtCaja  = null;
-		String whereBankAccount = "";
 		if (p_C_BankAccount_ID!=0){
 			 String value = DB.getSQLValueStringEx(trxName, "Select value from C_BankAccount where C_BankAccount_ID=? ", p_C_BankAccount_ID);
-			 whereBankAccount = " and tc.c_codigo = '"+value+"' ";
 		}
 		try{
 
@@ -1022,34 +983,8 @@ private void UpdateBSCA_Route(String c_sucursal ){
 	}
 	
 	
-	private Timestamp getEndDate(Timestamp date, Timestamp hour){
-		
-		Calendar calDate = Calendar.getInstance();
-		calDate.setTimeInMillis(date.getTime());
-		
-		Calendar calHour = Calendar.getInstance();
-		calHour.setTimeInMillis(hour.getTime());
-	
-		calDate.set(Calendar.HOUR_OF_DAY, calHour.get(Calendar.HOUR_OF_DAY));
-		calDate.set(Calendar.MINUTE, calHour.get(Calendar.MINUTE));
-		calDate.set(Calendar.SECOND, calHour.get(Calendar.SECOND));
-		calDate.set(Calendar.MILLISECOND,calHour.get(Calendar.MILLISECOND));
-		
-		return new Timestamp(calDate.getTimeInMillis());
-	}
-	
-	private MTax getTax(String n_montoimp, Integer C_TaxCategory_ID) {
-		MTax tax= new Query(Env.getCtx(),MTax.Table_Name,"rate = ? and AD_Client_ID = ? and C_TaxCategory_ID = ?",trxName).
-				setParameters(new BigDecimal(n_montoimp), Env.getAD_Client_ID(getCtx()),C_TaxCategory_ID).first();
-		return tax;
-	}
-	
 	private Integer getCaja(String c_caja, Integer AD_Org_ID) {
 		return DB.getSQLValueEx(trxName, "Select C_BankAccount_ID from C_BankAccount where value = '"+c_caja+"' and AD_Org_ID = "+AD_Org_ID + " and isActive = 'Y'");
-	}
-
-	private Integer getCajero(String c_cajero) {
-		return DB.getSQLValueEx(trxName, "Select AD_User_ID from BSCA_MA_Usuarios where codusuario = '"+c_cajero+"'");
 	}
 
 	private Integer getBSCA_Route_ID() {
@@ -1084,7 +1019,7 @@ private void UpdateBSCA_Route(String c_sucursal ){
 	
 	protected boolean isProductPriceList (int M_Product_ID, BigDecimal Qty, MOrder order){
 		MProductPricing m_productPrice = new MProductPricing (M_Product_ID, 
-			C_BPartner_ID, Qty, true);
+			C_BPartner_ID, Qty, true,trxName);
 		m_productPrice.setM_PriceList_ID(order.getM_PriceList_ID());
 		m_productPrice.setPriceDate(order.getDateOrdered());
 		m_productPrice.calculatePrice();
@@ -1097,13 +1032,6 @@ private void UpdateBSCA_Route(String c_sucursal ){
 				" and isActive = 'Y' and to_timestamp(processedOn/1000) <= '"+dateOrdered+"' and AD_Org_ID = "+AD_Org_ID+" order by processedOn desc"+LIMIT_1;
 		String PriceLastInv = DB.getSQLValueStringEx(trxName,sql );
 		return new BigDecimal(PriceLastInv==null?"0":PriceLastInv);
-	}
-	
-	private X_C_POSTenderType getPOSTenderType(String value, String c_codmoneda){
-		return new Query(Env.getCtx(),X_C_POSTenderType.Table_Name,"C_POSTenderType.Value = ? and C_Currency.POSCodeCurrency = ?",trxName).
-				addJoinClause("JOIN C_Currency ON C_Currency.C_Currency_ID = C_POSTenderType.C_Currency_ID").
-				setOnlyActiveRecords(true).
-				setParameters(value, c_codmoneda).first();
 	}
 	
 	private Integer getLCO_TaxPayerType(String rif) {

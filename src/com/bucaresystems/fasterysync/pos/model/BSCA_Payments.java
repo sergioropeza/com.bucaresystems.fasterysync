@@ -15,6 +15,9 @@ public class BSCA_Payments {
 	  private String  tendered;
 	  private String cardname;
 	  private String voucher;
+	  private String bsca_postendertype_id; 
+	  private String multiplyrate; 
+	  
 	public String getId() {
 		return id;
 	}
@@ -80,6 +83,18 @@ public class BSCA_Payments {
 	}
 	public void setVoucher(String voucher) {
 		this.voucher = voucher;
+	}
+	public String getBsca_postendertype_id() {
+		return bsca_postendertype_id;
+	}
+	public void setBsca_postendertype_id(String bsca_postendertype_id) {
+		this.bsca_postendertype_id = bsca_postendertype_id;
+	}
+	public String getMultiplyrate() {
+		return multiplyrate;
+	}
+	public void setMultiplyrate(String multiplyrate) {
+		this.multiplyrate = multiplyrate;
 	}
 
 	  
