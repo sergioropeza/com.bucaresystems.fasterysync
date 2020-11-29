@@ -18,7 +18,7 @@ public class BSCA_ClosedCash {
 	  private Timestamp dateend;
 	  private int nosales;
 	  private int BSCA_Route_ID;
-	  private String person; 
+	  private int AD_User_ID;
 	  
 	  
 	public String getMoney() {
@@ -70,7 +70,9 @@ public class BSCA_ClosedCash {
 		PreparedStatement pstmt = null;
 		
 		List<BSCA_ClosedCash> lstClosedCash = new ArrayList<BSCA_ClosedCash>();	
-		String sql = "Select cs.*,r.BSCA_Route_ID FROM closedcash cs "
+		String sql = "Select cs.*,r.BSCA_Route_ID,p.idempiere_ID as AD_User_ID "
+				+ " FROM pos.closedcash cs "
+				+ " LEFT JOIN pos.people p ON p.id = cs.people"
 				+ " LEFT JOIN BSCA_Route r ON r.BSCA_Route_UU = money "
 				+ " WHERE (r.docstatus is null or (r.DocStatus NOT IN  ('CO', 'VO')))";
 			//	+ " and money IN (select distinct money from receipts where bsca_Isimported = false) ";
@@ -86,6 +88,7 @@ public class BSCA_ClosedCash {
 				closedCash.setDateend(rs.getTimestamp("dateend"));
 				closedCash.setNosales(rs.getInt("nosales"));
 				closedCash.setBSCA_Route_ID(rs.getInt("BSCA_Route_ID"));
+				closedCash.setAD_User_ID(rs.getInt("AD_User_ID"));
 				lstClosedCash.add(closedCash);
 			}
 		} catch (SQLException e) {
@@ -99,12 +102,13 @@ public class BSCA_ClosedCash {
 		
 		return lstClosedCash;
 	}
-public String getPerson() {
-	return person;
-}
-public void setPerson(String person) {
-	this.person = person;
-}
+  
+	public int getAD_User_ID() {
+		return AD_User_ID;
+	}
+	public void setAD_User_ID(int aD_User_ID) {
+		AD_User_ID = aD_User_ID;
+	}
 	
 
 }

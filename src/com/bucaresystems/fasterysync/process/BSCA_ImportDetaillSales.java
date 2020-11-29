@@ -66,6 +66,7 @@ public class BSCA_ImportDetaillSales extends CustomProcess{
 	private int M_Warehouse_ID;
 	protected Integer p_LIMIT;
 	private Integer AD_Org_ID;
+	private String c_sucursal;
 	
 
 	@Override
@@ -86,7 +87,7 @@ public class BSCA_ImportDetaillSales extends CustomProcess{
 			trxName = get_TrxName();	
 			trx = Trx.get(trxName, false);
 		}
-		String c_sucursal = (new MOrg(Env.getCtx(), AD_OrgOrder_ID, null)).getValue();
+	  c_sucursal = (new MOrg(Env.getCtx(), AD_OrgOrder_ID, null)).getValue();
 		
 		if (!validateSucursal(c_sucursal))
 			return "";
@@ -110,7 +111,7 @@ public class BSCA_ImportDetaillSales extends CustomProcess{
 				int BSCA_Route_ID = route.get_ID();
 				String DocumentNo = route.get_ValueAsString("DocumentNo");
 				int C_BankAccount_ID = route.get_ValueAsInt("C_BankAccount_ID");
-				List<BSCA_Tickets> lstTickets = BSCA_Tickets.getTicketsNotImported(route.get_ValueAsString("BSCA_Route_UU"));
+				List<BSCA_Tickets> lstTickets = BSCA_Tickets.getTicketsNotSummaryNotImported(route.get_ValueAsString("BSCA_Route_UU"),c_sucursal);
 	
 		forTicket:for (BSCA_Tickets bsca_Tickets : lstTickets) {
 				try{
@@ -143,7 +144,6 @@ public class BSCA_ImportDetaillSales extends CustomProcess{
 							isValidRif = false;
 						}
 					}
-					String description = "";
 					if (isValidRif){ 
 						Integer bpartner_ID = getBParnert_ID(bPartnerValue);
 						String nameBPartner = customer.getName();
@@ -175,12 +175,10 @@ public class BSCA_ImportDetaillSales extends CustomProcess{
 							C_BPartner_ID = bpartner.getC_BPartner_ID();
 						else{
 							C_BPartner_ID =  p_C_BPartnerDefault_ID;
-							description = "Tercero no tiene dirección de entrega -"+ bpartner.getValue() +"_"+ bpartner.getName();
 						}
 	
 					}else{
 						C_BPartner_ID =  p_C_BPartnerDefault_ID;
-						description = " Rif "+bPartnerValue + " No válido";
 					}
 					
 					MOrder order = new MOrder(Env.getCtx(), 0, trxName);

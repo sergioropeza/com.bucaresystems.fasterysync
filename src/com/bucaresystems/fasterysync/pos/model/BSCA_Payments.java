@@ -1,7 +1,5 @@
 package com.bucaresystems.fasterysync.pos.model;
 
-import java.math.BigDecimal;
-
 public class BSCA_Payments {
 	
 	  private String id; 

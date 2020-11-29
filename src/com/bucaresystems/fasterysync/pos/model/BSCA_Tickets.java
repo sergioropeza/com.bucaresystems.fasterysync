@@ -79,19 +79,25 @@ public class BSCA_Tickets {
 		this.date = date;
 	}
 
-	public static List<BSCA_Tickets> getTicketsNotImported(String id){
+	public static List<BSCA_Tickets> getTicketsNotSummaryNotImported(String id,String orgvalue){
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
 		
 		List<BSCA_Tickets> lst = new ArrayList<BSCA_Tickets>();	
 				
 		String sql = "select t.*, r.datenew FROM pos.tickets t "
-					+"JOIN pos.receipts r ON r.id = t.id "
-					+"where r.money = ? and r.bsca_isimported = false";
+					+"JOIN pos.receipts r ON r.id = t.id "+
+					"where\n" + 
+					"r.money = '"+id+"' and \n" + 
+					"r.bsca_isimported = false and r.orgvalue  = '"+orgvalue+"' and \n" + 
+					"t.id  in (select t.id from pos.tickets t \n" + 
+					"\t\t\tjoin pos.receipts r on t.id = r.id \n" + 
+					"\t\t\tjoin pos.payments p on p.receipt  = t.id \n" + 
+					"\t\t\tJOIN C_POSTenderType pt ON pt.c_postendertype_id = p.bsca_postendertype_id::numeric \n" + 
+					"\t\t\twhere r.bsca_isimported  = false and r.orgvalue  ='"+orgvalue+"' and pt.BSCA_IsNotPaySummary = 'Y')\n" ;
 		try {
 			pstmt = DB.prepareStatement(sql, null);
 			
-			pstmt.setString(1, id);
 			rs = pstmt.executeQuery();
 			while(rs.next()){
 				BSCA_Tickets ticket = new BSCA_Tickets();		
@@ -124,7 +130,8 @@ public class BSCA_Tickets {
 		
 		List<BSCA_Tickets> lst = new ArrayList<BSCA_Tickets>();	
 				
-		String sql = "select date_trunc('month', r.datenew) as datenew, t.tickettype , min(ticketid) as TicketID FROM pos.tickets t \n" + 
+		String sql = "select date_trunc('month', r.datenew) as datenew, t.tickettype , min(ticketid) as TicketID , t.id,r.orgValue"
+				+ " FROM pos.tickets t \n" + 
 				"JOIN pos.receipts r ON r.id = t.id \n" + 
 				"where\n" + 
 				"r.money = ? and \n" + 
@@ -134,17 +141,19 @@ public class BSCA_Tickets {
 				"\t\t\tjoin pos.payments p on p.receipt  = t.id \n" + 
 				"\t\t\tJOIN C_POSTenderType pt ON pt.c_postendertype_id = p.bsca_postendertype_id::numeric \n" + 
 				"\t\t\twhere r.bsca_isimported  = false and r.orgvalue  ='"+orgvalue+"' and pt.BSCA_IsNotPaySummary = 'Y')\n" + 
-				"group by date_trunc('month', r.datenew), t.tickettype\n";
+				"group by date_trunc('month', r.datenew), t.tickettype, t.id,r.orgValue \n";
 		try {
 			pstmt = DB.prepareStatement(sql, null);
 			
 			pstmt.setString(1, closedcash_ID);
 			rs = pstmt.executeQuery();
 			while(rs.next()){
-				BSCA_Tickets ticket = new BSCA_Tickets();		
+				BSCA_Tickets ticket = new BSCA_Tickets();	
+				 ticket.setId(rs.getString("id"));
 				 ticket.setTicketid(rs.getInt("Ticketid"));
 				 ticket.setTickettype(rs.getInt("tickettype"));
 				 ticket.setDate(rs.getTimestamp("dateNew"));
+				 ticket.setOrgValue(rs.getString("OrgValue"));
 	  			 lst.add(ticket);
 			}
 		} catch (SQLException e) {
@@ -175,7 +184,7 @@ public class BSCA_Tickets {
 				" join pos.customers c  on t.customer  = c.id \n" + 
 				" where\n" + 
 				" r.money = '"+closedcash_ID+"' and \n" + 
-				" r.bsca_isimported = false and r.orgvalue  = '"+orgValue+"' and \n and t.tickettype = " +ticketType + 
+				" r.bsca_isimported = false and r.orgvalue  = '"+orgValue+"' and  t.tickettype = " +ticketType + 
 				" and t.id not in (select t.id from pos.tickets t \n" + 
 				" join pos.receipts r on t.id = r.id \n" + 
 				" join pos.payments p on p.receipt  = t.id \n" + 
@@ -470,7 +479,7 @@ public class BSCA_Tickets {
 					"join pos.tickets t on tl.ticket = t.id \n" + 
 					"join pos.receipts r on r.id = t.id \n" + 
 					"join pos.taxes t2 on tl.taxid  = t2.id "+
-					" where r.bsca_isimported = false and p.receipt  = '"+id+"' and r.orgvalue  = '"+orgValue+"' \n" + 
+					" where r.bsca_isimported = false and t.id  = '"+id+"' and r.orgvalue  = '"+orgValue+"' \n" + 
 					"group by  t2.idempiere_ID\n";
 
 			try { 
@@ -480,7 +489,7 @@ public class BSCA_Tickets {
 					BSCA_SummaryTax summaryTax = new BSCA_SummaryTax();
 					summaryTax.setLineNetAmt(rs.getString("linenetamt"));
 					summaryTax.setPriceTax(rs.getString("pricetax"));
-					summaryTax.setTax_ID(rs.getString("taxid"));
+					summaryTax.setTax_ID(rs.getString("idempiere_ID"));
 					summaryTax.setTotal(rs.getString("total"));
 					lstsummaryTax.add(summaryTax);
 				}
