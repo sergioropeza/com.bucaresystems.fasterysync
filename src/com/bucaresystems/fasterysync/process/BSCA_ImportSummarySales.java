@@ -205,12 +205,16 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					
 					String minDocStellar =tickets.getTicketid()+"";
 					Timestamp f_fecha = tickets.getDate();
-					int c_concepto = tickets.getTickettype();
 					int ticketType = tickets.getTickettype();
 					
 					Integer order_ID =-1;
 					
-					int DocTypeTarget_ID = c_concepto==0?C_DocTypeTarget_ID:C_DocTypeTargetNC_ID;
+					int DocTypeTarget_ID = 0;
+					if (BSCA_Tickets.RECEIPT_REFUND==ticketType){
+						DocTypeTarget_ID  = C_DocTypeTargetNC_ID;
+					}else if (BSCA_Tickets.RECEIPT_NORMAL==ticketType){
+						DocTypeTarget_ID = C_DocTypeTarget_ID;
+					}
 					String documentNo = orgValue+minDocStellar;
 					
 					order_ID= getC_Order_ID(documentNo,DocTypeTarget_ID,AD_Org_ID); // verifica si la orden  está registrada
@@ -240,9 +244,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					order.saveEx();	
 					log.warning("Orden estelar: "+documentNo);
 					
-					createPOSDetaillSummay( closeCash_ID,  orgValue,  ticketType, order);
-					
-					List<BSCA_TickeLines> lstTicketLines = tickets.getListSummaryTicketsLine();
+					List<BSCA_TickeLines> lstTicketLines = tickets.getListSummaryTicketsLine(closeCash_ID,ticketType); 
 					MPriceList priceList = new MPriceList(Env.getCtx(), M_PriceList_ID, trxName);
 	
 	transaccion:for (BSCA_TickeLines ticketLine : lstTicketLines) {
@@ -261,7 +263,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 							else 
 								Qty = cantidad;
 						}else
-							Qty =cantidad;
+						Qty =cantidad;
 						
 						KeyNamePair product = getM_ProductValue(valueProduct);
 						Integer BSCA_ProductValue_ID = null;
@@ -323,7 +325,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 	
 					if (BSCA_Tickets.RECEIPT_REFUND!=ticketType){
 						// sincroniza los tipos de pagos
-						List<BSCA_Payments> listPayments = tickets.getListSummaryPayments();
+						List<BSCA_Payments> listPayments = tickets.getListSummaryPayments(closeCash_ID,ticketType);
 						
 						for (BSCA_Payments payment : listPayments) {
 
@@ -361,7 +363,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					}
 				
 					BigDecimal granTotal = DB.getSQLValueBDEx(order.get_TrxName(),"Select GrandTotal from C_Order where C_Order_ID= " +order.get_ID());
-					if (BSCA_Tickets.RECEIPT_REFUND==ticketType){
+					if (BSCA_Tickets.RECEIPT_REFUND!=ticketType){
 																		
 						if (totalPOSPayments.compareTo(granTotal) != 0){
 							BigDecimal diff = totalPOSPayments.subtract(granTotal);
@@ -393,7 +395,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 							}
 						}
 					}
-					
+					createPOSDetaillSummay( closeCash_ID,  orgValue,  ticketType, order);
 					MDocType docTarget_ID = (MDocType)order.getC_DocTypeTarget();					
 					
 					if (docTarget_ID.get_ValueAsBoolean("BSCA_IsCompleitOnImport")){
@@ -533,7 +535,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					posTaxDetaill.saveEx();
 						
 				}
-				
+				System.out.println(id);
 				DB.executeUpdateEx("Update pos.receipts set bsca_isimported = true where id ='"+id +"' and orgValue = "+DB.TO_STRING(orgValue), trx.getTrxName());
 		});	
 	}
@@ -566,6 +568,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						if (AD_Org_ID!=-1)
 							order_ID= getC_Order_IDfromStellarDocumento(documentNo,DocTypeTarget_ID,AD_Org_ID); // verifica si la orden  está registrada
 						if (order_ID!=-1){
+							System.out.println(id);
 							DB.executeUpdateEx("Update pos.receipts set bsca_isimported = true where id ='"+id +"' and orgValue = "+DB.TO_STRING(orgValue), trx.getTrxName());
 							continue forPagos;
 						}
@@ -844,7 +847,8 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 							}
 						}
 						
-						MDocType docTarget_ID = (MDocType)order.getC_DocTypeTarget();				
+						MDocType docTarget_ID = (MDocType)order.getC_DocTypeTarget();	
+						System.out.println(id);
 						DB.executeUpdateEx("Update pos.receipts set bsca_isimported = true where id ='"+id +"' and orgValue = "+DB.TO_STRING(orgValue), trx.getTrxName());	
 						
 						if (docTarget_ID.get_ValueAsBoolean("BSCA_IsCompleitOnImport")){

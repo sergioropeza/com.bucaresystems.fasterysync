@@ -130,7 +130,7 @@ public class BSCA_Tickets {
 		
 		List<BSCA_Tickets> lst = new ArrayList<BSCA_Tickets>();	
 				
-		String sql = "select date_trunc('month', r.datenew) as datenew, t.tickettype , min(ticketid) as TicketID , t.id,r.orgValue"
+		String sql = "select date_trunc('month', r.datenew) as datenew, t.tickettype , min(ticketid) as TicketID ,r.orgValue"
 				+ " FROM pos.tickets t \n" + 
 				"JOIN pos.receipts r ON r.id = t.id \n" + 
 				"where\n" + 
@@ -141,7 +141,7 @@ public class BSCA_Tickets {
 				"\t\t\tjoin pos.payments p on p.receipt  = t.id \n" + 
 				"\t\t\tJOIN C_POSTenderType pt ON pt.c_postendertype_id = p.bsca_postendertype_id::numeric \n" + 
 				"\t\t\twhere r.bsca_isimported  = false and r.orgvalue  ='"+orgvalue+"' and pt.BSCA_IsNotPaySummary = 'Y')\n" + 
-				"group by date_trunc('month', r.datenew), t.tickettype, t.id,r.orgValue \n";
+				"group by date_trunc('month', r.datenew), t.tickettype,r.orgValue \n";
 		try {
 			pstmt = DB.prepareStatement(sql, null);
 			
@@ -149,7 +149,6 @@ public class BSCA_Tickets {
 			rs = pstmt.executeQuery();
 			while(rs.next()){
 				BSCA_Tickets ticket = new BSCA_Tickets();	
-				 ticket.setId(rs.getString("id"));
 				 ticket.setTicketid(rs.getInt("Ticketid"));
 				 ticket.setTickettype(rs.getInt("tickettype"));
 				 ticket.setDate(rs.getTimestamp("dateNew"));
@@ -384,7 +383,7 @@ public class BSCA_Tickets {
 			return lst;
 		}
 	 
-	 public List<BSCA_TickeLines> getListSummaryTicketsLine(){
+	 public List<BSCA_TickeLines> getListSummaryTicketsLine(String closeCash_ID, int ticketType){
 			ResultSet rs = null;
 			PreparedStatement pstmt = null;
 			
@@ -396,7 +395,7 @@ public class BSCA_Tickets {
 				    "join pos.receipts r on r.id = tl.ticket " + 
 					"join pos.tickets t on t.id = r.id \n" + 
 					"join pos.taxes t2 on tl.taxid  = t2.id "+
-					"where t.tickettype  = 0 and t.id = '"+id+"' and r.bsca_isimported = false and r.orgvalue = '"+orgValue+"'\n" + 
+					"where r.money = '"+closeCash_ID+"' and t.ticketType = "+ticketType+" and r.bsca_isimported = false and r.orgvalue = '"+orgValue+"'\n" + 
 					"and   t.id not in (select t.id from pos.tickets t \n" + 
 					" join pos.receipts r on t.id = r.id \n" + 
 					" join pos.payments p on p.receipt  = t.id \n" + 
@@ -429,7 +428,7 @@ public class BSCA_Tickets {
 			return lstTicketsLine;
 		}
 	 
-	 public List<BSCA_Payments> getListSummaryPayments(){
+	 public List<BSCA_Payments> getListSummaryPayments(String closeCash_ID, int ticketType){
 			ResultSet rs = null;
 			PreparedStatement pstmt = null;
 			
@@ -438,7 +437,8 @@ public class BSCA_Tickets {
 			String sql = " select bsca_postendertype_id,multiplyrate, sum(p.total) as total\n" + 
 					" from pos.payments p \n" + 
 					" join pos.receipts r on r.id = p.receipt\n" + 
-					" where r.bsca_isimported = false and p.receipt  = '"+id+"' and r.orgvalue  = '"+orgValue+"' \n" + 
+					" join pos.tickets t on t.id = r.id \n" + 
+					" where r.bsca_isimported = false and r.money  = '"+closeCash_ID+"' and t.ticketType = "+ticketType+"  and r.orgvalue  = '"+orgValue+"' \n" + 
 					" and   r.id not in (select r.id from pos.receipts r \n" + 
 					" join pos.payments p on p.receipt  = r.id \n" + 
 					" JOIN C_POSTenderType pt ON pt.c_postendertype_id = p.bsca_postendertype_id::numeric \n" + 
