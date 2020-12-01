@@ -5,8 +5,6 @@ CREATE table pos.receipts (
 	"attributes" bytea NULL,
 	person varchar NULL,
 	orgvalue varchar(255) NOT NULL ,
-	SubTotal double precision NOT NULL,
-	TaxAmt double precision NOT NULL,
 	subtotal double precision NOT NULL,
 	taxamt double precision NOT NULL,
 	GrandTotal double precision NOT NULL,

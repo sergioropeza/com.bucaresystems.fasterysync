@@ -15,8 +15,6 @@ CREATE TABLE pos.payments (
 	bsca_postendertype_id varchar(255) NULL,
 	orgvalue varchar(255) NULL DEFAULT NULL::character varying,
 	multiplyrate float8 NOT NULL DEFAULT 1,
-	CONSTRAINT payments_pkey PRIMARY KEY (id),
-	CONSTRAINT payments_fk_receipt FOREIGN KEY (receipt) REFERENCES receipts(id),
-	CONSTRAINT paymentstendertype_fx FOREIGN KEY (bsca_postendertype_id) REFERENCES bsca_postendertype(id)
+	CONSTRAINT payments_pkey PRIMARY KEY (id)
 );
 CREATE INDEX payments_payment_idx ON pos.payments USING btree (payment);

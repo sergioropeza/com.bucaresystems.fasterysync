@@ -7,7 +7,6 @@ CREATE TABLE pos.tickets (
 	status int4 NOT NULL DEFAULT 0,
 	bsca_fiscaldocumentno varchar(255) NULL,
 	bsca_machinefiscalnumber varchar(255) NULL,
-	CONSTRAINT tickets_pkey PRIMARY KEY (id),
-	CONSTRAINT tickets_fk_id FOREIGN KEY (id) REFERENCES receipts(id)
+	CONSTRAINT tickets_pkey PRIMARY KEY (id)
 );
 CREATE INDEX tickets_ticketid ON pos.tickets USING btree (tickettype, ticketid);
