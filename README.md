@@ -26,7 +26,7 @@ This project synchronize idempiere with Fastery Caja
  
 #### Symmetricds Instalation and Setup
 
-- Download [symmetricds 3.12.4](https://sourceforge.net/projects/symmetricds/files/symmetricds/symmetricds-3.12/symmetric-server-3.12.4.zip/download)
+- Download [symmetricds 3.88.44](https://sourceforge.net/projects/symmetricds/files/symmetricds/symmetricds-3.8/symmetric-server-3.8.44.zip)
 - Unzip the downloaded file, copy and edit the symmetricds-conf/corp.properties file on engines folder. 
 - Run the following command 
 ```bash

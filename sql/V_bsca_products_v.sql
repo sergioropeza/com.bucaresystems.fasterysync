@@ -2,16 +2,17 @@ CREATE OR REPLACE VIEW pos.bsca_products_v
 AS SELECT p.m_product_id::text || po.ad_org_id AS id,
     p.sku AS reference,
     p.sku AS code,
-    'CODE128'::text AS codetype,
+    'EAN-13'::text AS codetype,
     p.name,
     0 AS pricebuy,
     COALESCE(pp.pricelist, 0::numeric) AS pricesell,
     pc.m_product_category_id AS category,
     p.c_taxcategory_id AS taxcat,
     oi.value AS node_id,
-    p.m_product_id as idempiere_id,
+    p.m_product_id AS idempiere_id,
     pp.m_pricelist_version_id,
-    oi.ad_org_id
+    oi.ad_org_id, 
+    p.bscatypestellar ='2'::text as isscale
    FROM m_product p
      JOIN c_taxcategory tc ON tc.c_taxcategory_id = p.c_taxcategory_id
      JOIN m_product_category pc ON pc.m_product_category_id = p.m_product_category_id

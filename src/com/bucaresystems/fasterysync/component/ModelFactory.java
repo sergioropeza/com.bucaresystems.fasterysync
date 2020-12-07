@@ -19,6 +19,9 @@
 package com.bucaresystems.fasterysync.component;
 
 import com.bucaresystems.fasterysync.base.CustomModelFactory;
+import com.bucaresystems.fasterysync.model.X_BSCA_POSDetaill;
+import com.bucaresystems.fasterysync.model.X_BSCA_POSTaxDetaill;
+import com.bucaresystems.fasterysync.model.X_BSCA_SyncInvoice_Para;
 
 /**
  * Model Factory
@@ -36,6 +39,9 @@ public class ModelFactory extends CustomModelFactory {
 	 */
 	@Override
 	protected void initialize() {
+		registerModel(X_BSCA_SyncInvoice_Para.Table_Name, X_BSCA_SyncInvoice_Para.class);
+		registerModel(X_BSCA_POSTaxDetaill.Table_Name, X_BSCA_POSTaxDetaill.class);
+		registerModel(X_BSCA_POSDetaill.Table_Name, X_BSCA_POSDetaill.class);
 	}
 
 }

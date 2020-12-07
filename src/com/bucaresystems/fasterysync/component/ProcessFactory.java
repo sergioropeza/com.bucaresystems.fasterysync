@@ -20,6 +20,7 @@ package com.bucaresystems.fasterysync.component;
 
 import com.bucaresystems.fasterysync.base.CustomProcessFactory;
 import com.bucaresystems.fasterysync.process.BSCA_CreateFasteryPOSTable;
+import com.bucaresystems.fasterysync.process.BSCA_CreateParametersImportSales;
 import com.bucaresystems.fasterysync.process.BSCA_ImportAllSales;
 
 /**
@@ -40,6 +41,7 @@ public class ProcessFactory extends CustomProcessFactory {
 	protected void initialize() {
 		registerProcess(BSCA_CreateFasteryPOSTable.class);
 		registerProcess(BSCA_ImportAllSales.class);
+		registerProcess(BSCA_CreateParametersImportSales.class);
 	}
 
 }

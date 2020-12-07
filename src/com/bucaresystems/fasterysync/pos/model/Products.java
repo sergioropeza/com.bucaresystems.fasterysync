@@ -6,13 +6,14 @@ public class Products{
 
 	public static final String Table_Name = "pos.products";
 	public static final String View_Name = "pos.BSCA_products_v";
-	protected Object ad_org_id;
-	protected Object pricebuy;
+	protected Object isscale;
 	protected Object pricesell;
 	protected Object category;
 	protected Object taxcat;
 	protected Object idempiere_id;
 	protected Object m_pricelist_version_id;
+	protected Object ad_org_id;
+	protected Object pricebuy;
 	protected Object reference;
 	protected Object code;
 	protected Object codetype;
@@ -28,17 +29,11 @@ public class Products{
 		this(trxName);
 		this.idempiere_id = idempiere_ID;
 	}
-	public Object getAd_org_id() {
-		return ad_org_id;
+	public Object getIsscale() {
+		return isscale;
 	}
-	public void setAd_org_id(Object ad_org_id) {
-		this.ad_org_id = ad_org_id;
-	}
-	public Object getPricebuy() {
-		return pricebuy;
-	}
-	public void setPricebuy(Object pricebuy) {
-		this.pricebuy = pricebuy;
+	public void setIsscale(Object isscale) {
+		this.isscale = isscale;
 	}
 	public Object getPricesell() {
 		return pricesell;
@@ -69,6 +64,18 @@ public class Products{
 	}
 	public void setM_pricelist_version_id(Object m_pricelist_version_id) {
 		this.m_pricelist_version_id = m_pricelist_version_id;
+	}
+	public Object getAd_org_id() {
+		return ad_org_id;
+	}
+	public void setAd_org_id(Object ad_org_id) {
+		this.ad_org_id = ad_org_id;
+	}
+	public Object getPricebuy() {
+		return pricebuy;
+	}
+	public void setPricebuy(Object pricebuy) {
+		this.pricebuy = pricebuy;
 	}
 	public Object getReference() {
 		return reference;
@@ -108,20 +115,21 @@ public class Products{
 	}
 	public void save(String whereClause) {
 
-		String sql ="Insert Into "+Table_Name+" (ad_org_id,pricebuy,pricesell,category,taxcat,idempiere_id,m_pricelist_version_id,reference,code,codetype,name,node_id,id)"+
-		"(Select ad_org_id,pricebuy,pricesell,category,taxcat,idempiere_id,m_pricelist_version_id,reference,code,codetype,name,node_id,id from "+View_Name+" where 1=1 "+whereClause+")";
+		String sql ="Insert Into "+Table_Name+" (isscale,pricesell,category,taxcat,idempiere_id,m_pricelist_version_id,ad_org_id,pricebuy,reference,code,codetype,name,node_id,id)"+
+		"(Select isscale,pricesell,category,taxcat,idempiere_id,m_pricelist_version_id,ad_org_id,pricebuy,reference,code,codetype,name,node_id,id from "+View_Name+" where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
 
 		String sql ="Update "+Table_Name+" a set "+
-		"ad_org_id= b.ad_org_id,"+
-		"pricebuy= b.pricebuy,"+
+		"isscale= b.isscale,"+
 		"pricesell= b.pricesell,"+
 		"category= b.category,"+
 		"taxcat= b.taxcat,"+
 		"idempiere_id= b.idempiere_id,"+
 		"m_pricelist_version_id= b.m_pricelist_version_id,"+
+		"ad_org_id= b.ad_org_id,"+
+		"pricebuy= b.pricebuy,"+
 		"reference= b.reference,"+
 		"code= b.code,"+
 		"codetype= b.codetype,"+
