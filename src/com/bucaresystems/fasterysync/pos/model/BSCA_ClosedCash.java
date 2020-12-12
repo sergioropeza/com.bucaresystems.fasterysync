@@ -75,7 +75,7 @@ public class BSCA_ClosedCash {
 				+ " LEFT JOIN pos.people p ON p.id = cs.people"
 				+ " LEFT JOIN BSCA_Route r ON r.BSCA_Route_UU = money "
 				+ " WHERE (r.docstatus is null or (r.DocStatus NOT IN  ('CO', 'VO')))";
-			//	+ " and money IN (select distinct money from receipts where bsca_Isimported = false) ";
+				//+ " and money IN (select distinct money from pos.receipts where bsca_Isimported = false) ";
 		try {
 			pstmt = DB.prepareStatement(sql, null);
 			rs = pstmt.executeQuery();

@@ -12,6 +12,9 @@
 
 - Reload node
    ./symadmin --engine corp-000 reload-node B02
+
+   ./symadmin --engine store-B02 reload-node EXTERNAL_ID_NODE
+
    
    
    
@@ -29,3 +32,14 @@ select * from sym_data where data_id in
    
    delete from sym_data_event where batch_id='34' and data_id='287'
    
+   --respaldar base de datos 
+   pg_dump -h localhost -p 5482 --no-owner -U adempiere idempiere > /tmp/ExpDat.dmp 
+   jar cvfM ExpDat.jar ExpDat.dmp
+   
+   --restaurar base de datos
+   
+   psql -h localhost -p 5435 -d idempiere -U adempiere -f ExpDat.dmp
+   
+   restaurar en docker
+   
+   cat ExpDat.dmp | docker exec -i my-postgres4 psql -U adempiere -d idempiere_boga

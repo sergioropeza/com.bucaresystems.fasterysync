@@ -3,6 +3,7 @@ package com.bucaresystems.fasterysync.process;
 import java.math.BigDecimal;
 
 import org.compiere.process.ProcessInfoParameter;
+import org.compiere.util.DB;
 
 import com.bucaresystems.fasterysync.base.CustomProcess;
 import com.bucaresystems.fasterysync.model.X_BSCA_SyncInvoice_Para;
@@ -18,6 +19,8 @@ public class BSCA_CreateParametersImportSales extends CustomProcess{
 
 	@Override
 	protected String doIt() throws Exception {
+		
+		DB.executeUpdateEx("delete from BSCA_SyncInvoice_Para where AD_Org_ID = "+AD_Org_ID, get_TrxName());
 
 		ProcessInfoParameter[] para = getParameter();	
 		for (ProcessInfoParameter processInfoParameter : para) {

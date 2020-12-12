@@ -229,6 +229,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					order.setM_Warehouse_ID(M_Warehouse_ID);
 					order.setDocumentNo(documentNo);
 					order.setC_DocTypeTarget_ID(DocTypeTarget_ID);
+					order.setC_DocType_ID(DocTypeTarget_ID);
 					order.saveEx();	
 					order.setM_PriceList_ID(M_PriceList_ID);
 					order.setPaymentRule(PaymentRule);
@@ -963,7 +964,8 @@ private void UpdateBSCA_Route(String c_sucursal ){
 					String setEndate="";
 					if (EndDate!=null)
 						setEndate =", EndDate = "+EndDate;
-					DB.executeUpdateEx("Update BSCA_Route set isActive = "+isActive+" "+setEndate+" where BSCA_Route_ID = "+BSCA_Route_ID , trxName);				
+					DB.executeUpdateEx("Update BSCA_Route set isActive = "+isActive+" "+setEndate+" where BSCA_Route_ID = "+BSCA_Route_ID , trxName);	
+					trx.commit();
 					
 				}
 			}
@@ -988,7 +990,7 @@ private void UpdateBSCA_Route(String c_sucursal ){
 		 if (C_BankAccount_ID==-1){
 			 int C_Bank_ID = DB.getSQLValueEx(trxName, "select C_Bank_ID from C_Bank where isPOSBank= 'Y'");
 			 if (C_Bank_ID==-1) {
-				 throw new AdempiereException("No existo un banco POS (isPOSBank='Y')");
+				 throw new AdempiereException("No existe un banco POS (isPOSBank='Y')");
 			 }else {
 				MBankAccount bankAccount = new MBankAccount(getCtx(), 0, trxName); 
 				bankAccount.setC_Bank_ID(C_Bank_ID);

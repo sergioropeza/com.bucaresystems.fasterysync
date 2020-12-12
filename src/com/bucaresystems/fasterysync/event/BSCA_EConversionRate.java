@@ -15,7 +15,7 @@ public class BSCA_EConversionRate extends CustomEvent{
 			Object MultiplyRate = po.get_Value("MultiplyRate");
 			int C_Currency_ID = po.get_ValueAsInt("C_CurrencyTo_ID");
 			
-			DB.executeUpdateEx("update bsca_currency set multiplyrate = "+MultiplyRate+" where idempiere_ID = "+C_Currency_ID, po.get_TrxName());
+			DB.executeUpdateEx("update pos.bsca_currency set multiplyrate = "+MultiplyRate+" where idempiere_ID = "+C_Currency_ID, po.get_TrxName());
 		}
 	}
 
