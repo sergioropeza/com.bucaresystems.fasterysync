@@ -1,5 +1,5 @@
 - Uninstall symmetricds on node
-	bin/symadmin uninstall --engine corp 
+	bin/symadmin uninstall --engine corp-000
 	
 - Create symmetricds table on data base
 	bin/symadmin  --engine corp create-sym-tables
@@ -11,35 +11,38 @@
 	./dbcompare TABLENAME -s ../engines/corp.properties -t ../engines/store.properties --output-sql diff.sql --use-sym-config true
 
 - Reload node
-   ./symadmin --engine corp-000 reload-node B02
+   
+    ./symadmin --engine ENGINE_NAME_SOURCE reload-node EXTERNAL_ID_NODE_TARGET
+    Example:
+	./symadmin --engine corp-000 reload-node B02
+	./symadmin --engine store-B02 reload-node w-B0202
+	./symadmin --engine store-B02 reload-node w-B0203
 
-   ./symadmin --engine store-B02 reload-node EXTERNAL_ID_NODE
 
-   
-   
-   
-   error en salida de lotes 
+
+- Check out data error and fix it. 
    
    select * from sym_outgoing_batch where error_flag=1;
-
-select * from sym_data where data_id in
+   
+   select * from sym_data where data_id in
    (select data_id from sym_data_event where batch_id='34');
   
-  select * from sym_data where data_id in
+   select * from sym_data where data_id in
     (select failed_data_id from sym_outgoing_batch where batch_id='34');
    
    update sym_outgoing_batch set status='OK' where batch_id= '41'
    
    delete from sym_data_event where batch_id='34' and data_id='287'
    
-   --respaldar base de datos 
+- Backup Data Base
+ 
    pg_dump -h localhost -p 5482 --no-owner -U adempiere idempiere > /tmp/ExpDat.dmp 
    jar cvfM ExpDat.jar ExpDat.dmp
    
-   --restaurar base de datos
+- Restore Data Base
    
    psql -h localhost -p 5435 -d idempiere -U adempiere -f ExpDat.dmp
    
-   restaurar en docker
+- Restore Data base for Docker
    
    cat ExpDat.dmp | docker exec -i my-postgres4 psql -U adempiere -d idempiere_boga
