@@ -1,0 +1,40 @@
+******** Add node on store server ********************
+
+1- ssh administrador@10.10.0.18
+     Password C0ntr0l.987*
+
+2- service SymmetricDS stop
+
+3- cd /opt/symmetricds/symmetric-server-3.8.44/engines/
+
+4- Create a new properties file for new node.  
+	Example new node ORG:B02, Workstation-Number:04
+
+	-cp workstation-B0203.properties  workstation-B0204.properties 
+
+	- open new file: workstation-B0204.properties 
+	    nano workstation-B0204.properties 
+	
+	- change properties:		
+		engine.name=workstation-B0204
+		external.id=w-B0204
+		db.url=jdbc:postgresql://IP_NEW_NODE:POSTGRES_PORT/unicentaopos?stringtype=unspecified
+
+5- service SymmetricDS restart
+
+6- Reload node
+   cd /opt/symmetricds/symmetric-server-3.8.44/bin
+
+    ./symadmin --engine ENGINE_NAME_SOURCE reload-node EXTERNAL_ID_NODE_TARGET
+   
+   Example:
+	./symadmin --engine store-B02 reload-node w-B0204
+
+7- Check new node on postgresql database store server. 
+    select * from symmetricds.sym_node;
+
+
+
+
+
+

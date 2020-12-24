@@ -19,6 +19,11 @@
 	./symadmin --engine store-B02 reload-node w-B0203
 
 
+- Into to dabase
+   bin/dbsql --engine ENGINE NAME
+   Example: 
+   	bin/dbsql --engine workstation-B0203
+   
 
 - Check out data error and fix it. 
    
@@ -30,9 +35,9 @@
    select * from sym_data where data_id in
     (select failed_data_id from sym_outgoing_batch where batch_id='34');
    
-   update sym_outgoing_batch set status='OK' where batch_id= '41'
+   update sym_outgoing_batch set status='OK' where batch_id= '203';
    
-   delete from sym_data_event where batch_id='34' and data_id='287'
+   delete from sym_data_event where batch_id='203' and data_id='397';
    
 - Backup Data Base
  

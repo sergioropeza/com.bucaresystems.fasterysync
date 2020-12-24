@@ -310,3 +310,21 @@ insert into sym_parameter(external_id, node_group_id, param_key, param_value, cr
 (select 'ALL','ALL','auto.registration','true',null,'admin',null where (select distinct 1 from sym_parameter where  external_id = 'ALL' and node_group_id = 'ALL' and param_key = 'auto.registration') is null);
 
 
+
+---------new table 22-12-2020
+
+insert into sym_channel (channel_id, processing_order, max_batch_size, enabled, description)
+				  values('payment_gateway', 50, 100000, 1, 'Payment Gateway');
+
+insert into sym_trigger (trigger_id,source_schema_name,source_table_name,channel_id,last_update_time,create_time,sync_on_incoming_batch)
+				  values('bsca_paymentinstapago','pos','bsca_paymentinstapago','payment_gateway',current_timestamp,current_timestamp,1);
+
+insert into sym_trigger_router 
+(trigger_id,router_id,initial_load_order,last_update_time,create_time)
+values('bsca_paymentinstapago','workstation_2_store', 100, current_timestamp, current_timestamp);
+
+insert into sym_trigger_router 
+(trigger_id,router_id,initial_load_order,last_update_time,create_time)
+values('bsca_paymentinstapago','store_2_corp', 100, current_timestamp, current_timestamp);
+
+
