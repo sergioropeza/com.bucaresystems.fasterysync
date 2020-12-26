@@ -73,6 +73,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 	private int AD_Org_ID;
 	private int M_Warehouse_ID;
 	protected Integer p_LIMIT;
+	private String c_caja;
 	
 	@Override
 	protected void prepare() {
@@ -131,9 +132,10 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 			trx = Trx.get(trxName, false);
 		}
 		String c_sucursal = (new MOrg(Env.getCtx(), AD_OrgOrder_ID, null)).getValue();
-		UpdateBSCA_Route(c_sucursal);
 		if (!validateSucursal(c_sucursal))
 			return "";
+		UpdateBSCA_Route(c_sucursal);
+
 		
 		String whereBankAccount = "";
 //		if (p_C_BankAccount_ID!=0){
@@ -150,7 +152,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						int BSCA_Route_ID = route.get_ID();
 						int C_BankAccount_ID = route.get_ValueAsInt("C_BankAccount_ID");
 						boolean isActive = route.isActive();
-						String c_caja = DB.getSQLValueStringEx(trxName, "select value from C_BankAccount where C_BankAccount_ID=? ", C_BankAccount_ID);
+						c_caja = DB.getSQLValueStringEx(trxName, "select value from C_BankAccount where C_BankAccount_ID=? ", C_BankAccount_ID);
 						String DocumentNo = route.get_ValueAsString("DocumentNo");
 						if (c_caja==null || DocumentNo ==null)
 							continue forRoutes;
@@ -215,7 +217,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					}else if (BSCA_Tickets.RECEIPT_NORMAL==ticketType){
 						DocTypeTarget_ID = C_DocTypeTarget_ID;
 					}
-					String documentNo = orgValue+minDocStellar;
+					String documentNo = orgValue+c_caja+minDocStellar;
 					
 					order_ID= getC_Order_ID(documentNo,DocTypeTarget_ID,AD_Org_ID); // verifica si la orden  está registrada
 					if (order_ID!=-1){
@@ -993,6 +995,7 @@ private void UpdateBSCA_Route(String c_sucursal ){
 				 throw new AdempiereException("No existe un banco POS (isPOSBank='Y')");
 			 }else {
 				MBankAccount bankAccount = new MBankAccount(getCtx(), 0, trxName); 
+				bankAccount.setAD_Org_ID(AD_Org_ID);
 				bankAccount.setC_Bank_ID(C_Bank_ID);
 				bankAccount.setValue(name);
 				bankAccount.setName(name);
