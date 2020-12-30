@@ -29,20 +29,24 @@
    
    select * from sym_outgoing_batch where error_flag=1;
    
-   select * from sym_data where data_id in
-   (select data_id from sym_data_event where batch_id='34');
+   select data_id from sym_data where data_id in
+   (select data_id from sym_data_event where batch_id='678');
   
    select * from sym_data where data_id in
     (select failed_data_id from sym_outgoing_batch where batch_id='34');
    
-   update sym_outgoing_batch set status='OK' where batch_id= '203';
+   update sym_outgoing_batch set status='OK' where batch_id= '678';
    
-   delete from sym_data_event where batch_id='203' and data_id='397';
+   delete from sym_data_event where batch_id='678' and data_id='688';
    
 - Backup Data Base
  
    pg_dump -h localhost -p 5482 --no-owner -U adempiere idempiere > /tmp/ExpDat.dmp 
    jar cvfM ExpDat.jar ExpDat.dmp
+   
+- Download DB from central server
+   
+   scp -P 45456 buc4r35y5t3m5@10.10.0.1:/tmp/ExpDat.jar .
    
 - Restore Data Base
    
@@ -51,3 +55,9 @@
 - Restore Data base for Docker
    
    cat ExpDat.dmp | docker exec -i my-postgres4 psql -U adempiere -d idempiere_boga
+   
+ - Check error data incoming symmetricds
+ 
+		 select * from symmetricds.sym_incoming_batch sib 
+		where node_id = 'w-B0202' and status = 'ER'
+		order by batch_id  desc limit 100

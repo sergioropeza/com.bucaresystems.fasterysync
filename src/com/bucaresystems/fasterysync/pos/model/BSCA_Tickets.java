@@ -85,8 +85,11 @@ public class BSCA_Tickets {
 		
 		List<BSCA_Tickets> lst = new ArrayList<BSCA_Tickets>();	
 				
-		String sql = "select t.*, r.datenew FROM pos.tickets t "
-					+"JOIN pos.receipts r ON r.id = t.id "+
+		String sql = "select t.*, r.datenew "
+					+ ",c.taxid , c.name as customername "
+					+ " FROM pos.tickets t "
+					+"JOIN pos.receipts r ON r.id = t.id "
+					+" join pos.customers c on c.id  = t.customer "+
 					"where\n" + 
 					"r.money = '"+id+"' and \n" + 
 					"r.bsca_isimported = false and r.orgvalue  = '"+orgvalue+"' and \n" + 
@@ -107,6 +110,9 @@ public class BSCA_Tickets {
 				 ticket.setPerson(rs.getString("person"));
 				 ticket.setCustomer(rs.getString("customer"));
 				 ticket.setDate(rs.getTimestamp("datenew"));
+				 ticket.setTaxid(rs.getString("taxid"));
+				 ticket.setCustomerName(rs.getString("customername"));
+				 
 				 
 				 
 				lst.add(ticket);
@@ -130,7 +136,7 @@ public class BSCA_Tickets {
 		
 		List<BSCA_Tickets> lst = new ArrayList<BSCA_Tickets>();	
 				
-		String sql = "select date_trunc('month', r.datenew) as datenew, t.tickettype , min(ticketid) as TicketID ,r.orgValue"
+		String sql = "select date_trunc('day', r.datenew) as datenew, t.tickettype , min(ticketid) as TicketID ,r.orgValue"
 				+ " FROM pos.tickets t \n" + 
 				"JOIN pos.receipts r ON r.id = t.id \n" + 
 				"where\n" + 
@@ -141,7 +147,7 @@ public class BSCA_Tickets {
 				"\t\t\tjoin pos.payments p on p.receipt  = t.id \n" + 
 				"\t\t\tJOIN C_POSTenderType pt ON pt.c_postendertype_id = p.bsca_postendertype_id::numeric \n" + 
 				"\t\t\twhere r.bsca_isimported  = false and r.orgvalue  ='"+orgvalue+"' and pt.BSCA_IsNotPaySummary = 'Y')\n" + 
-				"group by date_trunc('month', r.datenew), t.tickettype,r.orgValue \n";
+				"group by date_trunc('day', r.datenew), t.tickettype,r.orgValue \n";
 		try {
 			pstmt = DB.prepareStatement(sql, null);
 			
@@ -235,7 +241,7 @@ public class BSCA_Tickets {
 				" join pos.customers c  on t.customer  = c.id \n" + 
 				" where\n" + 
 				" r.money = '"+closedcash_ID+"' and \n" + 
-				" r.bsca_isimported = false and r.orgvalue  = '"+orgValue+"' and \n" + 
+				" r.bsca_isimported = false and r.orgvalue  = '"+orgValue+"' \n" + 
 				" and t.tickettype = "+ticketType;
 		
 		pstmt = DB.prepareStatement(sql, null);
@@ -368,6 +374,7 @@ public class BSCA_Tickets {
 					payment.setTendered(rs.getString("tendered"));
 					payment.setCardname(rs.getString("cardName"));
 					payment.setVoucher(rs.getString("voucher"));
+					payment.setMultiplyrate(rs.getString("multiplyrate"));
 					payment.setBsca_postendertype_id(rs.getString("bsca_postendertype_id"));
 					lst.add(payment);
 				}

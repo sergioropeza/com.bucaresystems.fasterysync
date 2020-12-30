@@ -19,6 +19,8 @@ public class BSCA_ClosedCash {
 	  private int nosales;
 	  private int BSCA_Route_ID;
 	  private int AD_User_ID;
+	  private int qtySales; 
+	  private int qtyRefunds;
 	  
 	  
 	public String getMoney() {
@@ -73,7 +75,7 @@ public class BSCA_ClosedCash {
 		String sql = "Select cs.*,r.BSCA_Route_ID,p.idempiere_ID as AD_User_ID "
 				+ " FROM pos.closedcash cs "
 				+ " LEFT JOIN pos.people p ON p.id = cs.people"
-				+ " LEFT JOIN BSCA_Route r ON r.BSCA_Route_UU = money "
+				+ " LEFT JOIN BSCA_Route r ON r.closedcashID = money "
 				+ " WHERE (r.docstatus is null or (r.DocStatus NOT IN  ('CO', 'VO')))"
 				+ " and money IN (select distinct money from pos.receipts where bsca_Isimported = false) ";
 		try {
@@ -89,6 +91,8 @@ public class BSCA_ClosedCash {
 				closedCash.setNosales(rs.getInt("nosales"));
 				closedCash.setBSCA_Route_ID(rs.getInt("BSCA_Route_ID"));
 				closedCash.setAD_User_ID(rs.getInt("AD_User_ID"));
+				closedCash.setQtySales(rs.getInt("QtySales"));
+				closedCash.setQtyRefunds(rs.getInt("QtyRefund"));
 				lstClosedCash.add(closedCash);
 			}
 		} catch (SQLException e) {
@@ -108,6 +112,18 @@ public class BSCA_ClosedCash {
 	}
 	public void setAD_User_ID(int aD_User_ID) {
 		AD_User_ID = aD_User_ID;
+	}
+	public int getQtySales() {
+		return qtySales;
+	}
+	public void setQtySales(int qtySales) {
+		this.qtySales = qtySales;
+	}
+	public int getQtyRefunds() {
+		return qtyRefunds;
+	}
+	public void setQtyRefunds(int qtyRefunds) {
+		this.qtyRefunds = qtyRefunds;
 	}
 	
 

@@ -119,8 +119,8 @@ public class BSCA_ImportDetaillSales extends CustomProcess{
 					savePoint = trx.setSavepoint(null);
 					seq+=10;
 					
-					BCSA_Customers customer = BCSA_Customers.getCustomer(bsca_Tickets.getCustomer());
-					String bPartnerValue = customer.getTaxid();
+
+					String bPartnerValue = bsca_Tickets.getTaxid();
 					Boolean isValidRif = true;
 					Integer taxIdType=0;
 					
@@ -146,7 +146,7 @@ public class BSCA_ImportDetaillSales extends CustomProcess{
 					}
 					if (isValidRif){ 
 						Integer bpartner_ID = getBParnert_ID(bPartnerValue);
-						String nameBPartner = customer.getName();
+						String nameBPartner = bsca_Tickets.getCustomerName();
 						MBPartner bpartner =null;
 						if (bpartner_ID==-1){
 							bpartner = new MBPartner(getCtx(), 0, null);

@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
@@ -143,7 +144,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 //			 whereBankAccount = " and C_BankAccount.value = '"+value+"'";
 //		}
 			
-		List<PO> lstBSCA_Route = new Query(getCtx(), "BSCA_Route", " C_DocTypeTarget_ID =?  and BSCA_Route_UU IN ("
+		List<PO> lstBSCA_Route = new Query(getCtx(), "BSCA_Route", " C_DocTypeTarget_ID =?  and ClosedCashID IN ("
 				+ "select distinct money from pos.receipts where bsca_Isimported = false) "+whereBankAccount , trxName).
 				setParameters(C_DocTypeLot_ID).setOrderBy("StartDate, AD_Org_ID,C_BankAccount_ID").list();
 			
@@ -157,10 +158,10 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						if (c_caja==null || DocumentNo ==null)
 							continue forRoutes;
 						
-						String closedCash = route.get_ValueAsString("BSCA_Route_UU");
+						String closedCash = route.get_ValueAsString("ClosedCashID");
 						
 			            //// VALIDA QUE TODOS LOS REGISTROS DE TICKETS SE HAYAN SINCRONIZADO /////////////////////////
-						if (!isAllSales(closedCash,c_sucursal))
+						if (!isAllSales(route))
 							continue forRoutes;					
 						
 						importOrdersNotSummary(closedCash,BSCA_Route_ID, C_BankAccount_ID, c_sucursal);
@@ -441,10 +442,38 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 		}// FOR PAGOS	
 	}
 
-	private boolean isAllSales(String closedCash_ID, String orgValue) {
+	private boolean isAllSales(PO route) {
 		
-		Timestamp dateEnd = DB.getSQLValueTS(trxName, "select dateend from pos.closedcash c where money = '"+closedCash_ID+"' and orgvalue = '"+orgValue+"'");
-		return dateEnd !=null;
+		String closedCashID  = route.get_ValueAsString("closedCashID");
+		Timestamp dateEnd = DB.getSQLValueTS(trxName, "select dateend from pos.closedcash c where money = '"+closedCashID+"'");
+		if (dateEnd ==null) {
+			log.severe("turno sin fecha de cierre "+route.get_ValueAsString("DocumentNo"));
+			return false;
+		}
+			
+		String sqlSales = "select count(t.id) from pos.receipts r\n" + 
+				"join pos.tickets t on t.id = r.id \n" + 
+				"where t.tickettype = 0 and  money = '"+closedCashID+"'\n";
+		
+		String sqlRefund = "select count(t.id) from pos.receipts r\n" + 
+				"join pos.tickets t on t.id = r.id \n" + 
+				"where t.tickettype = 1 and money = '"+closedCashID+"'\n";
+		
+		int qytSalesSync = DB.getSQLValueEx(trxName, sqlSales);
+		int qtyRefundSync = DB.getSQLValueEx(trxName, sqlRefund);
+		
+		int qtySalesRoute = route.get_ValueAsInt("QtySales");
+		int qtyRefundRoute = route.get_ValueAsInt("QtyRefunds");
+			
+		if ((qtyRefundSync!=qtyRefundRoute) || (qtySalesRoute!=qytSalesSync)) {
+			log.severe("Cantidad de registros sincronizados de "
+					+ "  la tabla pos.tickets (Ventas = "+qytSalesSync+", Devolución = "+qtyRefundSync+") es distinto a la "
+					+ "   cantidad registrada en el turno (Ventas = "+qtySalesRoute+", Devolución = "+qtyRefundRoute+")"
+					+ ", "+route.get_ValueAsString("DocumentNo")
+					+ ", closedCashID = "+route.get_ValueAsString("closedcashID"));
+			return false;
+		}	
+		return true;
 	}
 
 	private void createPOSDetaillNotSummary( String closedcash_ID, String orgValue, int ticketType,MOrder order){
@@ -562,7 +591,6 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						Timestamp f_fecha = ticket.getDate();
 						Timestamp POSDate = ticket.getDate();
 						String id = ticket.getId();
-						String taxID = ticket.getTaxid();
 						
 						
 						int DocTypeTarget_ID = BSCA_Tickets.RECEIPT_REFUND==ticketType?C_DocTypeTargetNC_ID:C_DocTypeTarget_ID;
@@ -686,7 +714,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						}
 
 						order.set_ValueOfColumn("BSCA_SeqNo", seq);
-						order.set_ValueOfColumn("BSCA_StellarRif", taxID);
+						order.set_ValueOfColumn("BSCA_StellarRif", bPartnerValue);
 						order.set_ValueOfColumn("BSCA_StellarName", c_desc_cliente);
 						order.saveEx();	
 						log.warning("Orden estelar: "+documentNo);
@@ -699,11 +727,11 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						MPriceList priceList = new MPriceList(Env.getCtx(), M_PriceList_ID, trxName);
 						List<BSCA_TickeLines> lstTicketsLine = ticket.getTicketLines();
 
-						forTransaccion:for (BSCA_TickeLines ma_Transaccion : lstTicketsLine) {
-							String valueProduct = ma_Transaccion.getProductCode();
-							String BSCA_ValuePOS = ma_Transaccion.getBsca_productValue();
-							BigDecimal cantidad =  new BigDecimal(ma_Transaccion.getUnits());
-							BigDecimal price = new BigDecimal(ma_Transaccion.getPrice()).setScale(order.getPrecision(), RoundingMode.HALF_UP);
+						forTransaccion:for (BSCA_TickeLines ticketLine : lstTicketsLine) {
+							String valueProduct = ticketLine.getProductCode();
+							String BSCA_ValuePOS = ticketLine.getBsca_productValue();
+							BigDecimal cantidad =  new BigDecimal(ticketLine.getUnits());
+							BigDecimal price = new BigDecimal(ticketLine.getPrice()).setScale(order.getPrecision(), RoundingMode.HALF_UP);
 	
 							int M_Product_ID = p_M_Product_ID;
 							String descriptionLine = "";
@@ -744,7 +772,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 							MProduct mProduct = new MProduct(getCtx(), M_Product_ID, trxName);
 							
 							
-							int C_Tax_ID = Integer.parseInt(taxID);
+						    int  C_Tax_ID = Integer.parseInt(ticketLine.getTaxid());
 							BSCA_Tax tax = new BSCA_Tax(getCtx(), C_Tax_ID, trxName);
 	
 							BigDecimal PurchaseAmt = getPurchaseAmt(M_Product_ID, POSDate,AD_Org_ID);
@@ -932,6 +960,13 @@ private void UpdateBSCA_Route(String c_sucursal ){
 				int hostsequence = closedCash.getHostsequence();
 				String EndDate = closedCash.getDateend()==null?null:"'"+closedCash.getDateend()+"'" ;
 				String isActive = closedCash.getDateend()!=null? "'Y'":"'N'";
+				int userPOS_ID =closedCash.getAD_User_ID();
+				if (userPOS_ID==0){
+					userPOS_ID = Env.getAD_User_ID(getCtx());
+				}
+				int qtySales = closedCash.getQtySales();
+				int qtyRefunds = closedCash.getQtyRefunds();
+				 
 				if (BSCA_Route_ID==0){
 					
 					Timestamp StartDate = closedCash.getDatestart();
@@ -942,31 +977,33 @@ private void UpdateBSCA_Route(String c_sucursal ){
 					Integer AD_User_ID = Env.getAD_User_ID(getCtx());
 					BSCA_Route_ID = getBSCA_Route_ID();
 					Integer AD_Client_ID = Env.getAD_Client_ID(getCtx());
-					String BSCA_Route_UU = DB.TO_STRING(closedCash.getMoney());//DB.TO_STRING(UUID.randomUUID().toString());
-					int userPOS_ID =closedCash.getAD_User_ID();
-					Integer C_BankAccount_ID = getC_BankAccount_ID(host,AD_Org_ID);
+					String BSCA_Route_UU =DB.TO_STRING(UUID.randomUUID().toString());
+					String closedCashID = DB.TO_STRING(closedCash.getMoney());
 					
-					
+					Integer C_BankAccount_ID = getC_BankAccount_ID(host,AD_Org_ID);				
 					Timestamp DateAcct = closedCash.getDatestart();			
-					
-					if (userPOS_ID==0){
-						userPOS_ID = Env.getAD_User_ID(getCtx());
-					}
+				
 					
 					String sqlInsert = "Insert into BSCA_Route (BSCA_Route_ID,BSCA_Route_UU,AD_Org_ID,AD_Client_ID, IsActive,CreatedBy,UpdatedBy,Created,Updated,"
-									 + "DateAcct,StartDate,EndDate,C_DocTypeTarget_ID,DocStatus,DeliveryViaRule,DocumentNo,processed, AD_User_ID,C_BankAccount_ID,BSCA_StellarQtySales) Values "
+									 + "DateAcct,StartDate,EndDate,C_DocTypeTarget_ID,DocStatus,DeliveryViaRule,DocumentNo,processed, AD_User_ID,C_BankAccount_ID,QtySales,QtyRefunds,ClosedCashID) Values "
 									 +"("+BSCA_Route_ID +","+BSCA_Route_UU+","+AD_Org_ID+","+AD_Client_ID+","+isActive+","+AD_User_ID+","+AD_User_ID+
 									 ",SysDate,SysDate,'"+DateAcct+"','"+StartDate+"',"+EndDate+","+C_DocType_ID+",'"+DocStatus+"','"
-									 +DeliveryViaRule+"','"+DocumentNo+"','N',"+userPOS_ID+","+C_BankAccount_ID+","+0+")";
+									 +DeliveryViaRule+"','"+DocumentNo+"','N',"+userPOS_ID+","+C_BankAccount_ID+","+qtySales+","+qtyRefunds+","+closedCashID+")";
 					DB.executeUpdateEx(sqlInsert, trxName);
 					addLog(0, null, null, "Ruta Registrada: "+DocumentNo,MTable.getTable_ID("BSCA_Route"), BSCA_Route_ID);
 				}else{
-					DB.executeUpdateEx("Update BSCA_Route set BSCA_StellarQtySales = "+0+"  where BSCA_Route_ID = "+BSCA_Route_ID , trxName);
+
 						
 					String setEndate="";
 					if (EndDate!=null)
 						setEndate =", EndDate = "+EndDate;
-					DB.executeUpdateEx("Update BSCA_Route set isActive = "+isActive+" "+setEndate+" where BSCA_Route_ID = "+BSCA_Route_ID , trxName);	
+					
+					String sqlUpdate = "Update BSCA_Route set isActive = "+isActive
+							+ ", qtySales = "+qtySales+", qtyRefunds = "+qtyRefunds
+							+" , AD_User_ID = "+userPOS_ID
+							+ setEndate
+							+" where BSCA_Route_ID = "+BSCA_Route_ID ;
+					DB.executeUpdateEx(sqlUpdate , trxName);	
 					trx.commit();
 					
 				}
