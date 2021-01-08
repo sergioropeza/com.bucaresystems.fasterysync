@@ -29,8 +29,10 @@
    
    select batch_id , node_id , status, sql_message  from sym_outgoing_batch where error_flag=1;
    
-   select data_id from symmetricds.sym_data where data_id in
-   (select data_id from symmetricds.sym_data_event where batch_id='12855');
+   select batch_id , node_id ,channel_id status, sql_message  from sym_outgoing_batch where status <> 'OK'
+   
+   select * from symmetricds.sym_data where data_id in
+   (select data_id from symmetricds.sym_data_event where batch_id='1731');
   
    select * from sym_data where data_id in
     (select failed_data_id from sym_outgoing_batch where batch_id='34');
@@ -38,7 +40,7 @@
    
    
    delete from symmetricds.sym_data_event where batch_id='12795';
-  update symmetricds.sym_outgoing_batch set status='OK' where batch_id= '12795';
+  update symmetricds.sym_outgoing_batch set status='OK' where batch_id= '1731';
    
 - Backup Data Base
  
