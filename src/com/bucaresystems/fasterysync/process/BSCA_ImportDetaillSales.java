@@ -333,7 +333,7 @@ public class BSCA_ImportDetaillSales extends CustomProcess{
 		}
 		try{
 
-			List<BSCA_ClosedCash> lstClosedCash = BSCA_ClosedCash.getListClosedCash();
+			List<BSCA_ClosedCash> lstClosedCash = BSCA_ClosedCash.getListClosedCash(c_sucursal);
 			
 			for (BSCA_ClosedCash bsca_ClosedCash : lstClosedCash) {
 				int BSCA_Route_ID = bsca_ClosedCash.getBSCA_Route_ID();

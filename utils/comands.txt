@@ -27,17 +27,18 @@
 
 - Check out data error and fix it. 
    
-   select * from sym_outgoing_batch where error_flag=1;
+   select batch_id , node_id , status, sql_message  from sym_outgoing_batch where error_flag=1;
    
-   select data_id from sym_data where data_id in
-   (select data_id from sym_data_event where batch_id='678');
+   select data_id from symmetricds.sym_data where data_id in
+   (select data_id from symmetricds.sym_data_event where batch_id='12855');
   
    select * from sym_data where data_id in
     (select failed_data_id from sym_outgoing_batch where batch_id='34');
    
-   update sym_outgoing_batch set status='OK' where batch_id= '678';
    
-   delete from sym_data_event where batch_id='678' and data_id='688';
+   
+   delete from symmetricds.sym_data_event where batch_id='12795';
+  update symmetricds.sym_outgoing_batch set status='OK' where batch_id= '12795';
    
 - Backup Data Base
  
@@ -54,10 +55,42 @@
    
 - Restore Data base for Docker
    
-   cat ExpDat.dmp | docker exec -i my-postgres4 psql -U adempiere -d idempiere_boga
+   cat ExpDat.dmp | docker exec -i my-postgres4 psql -U adempiere -d idempiere_boga04012021
    
  - Check error data incoming symmetricds
  
 		 select * from symmetricds.sym_incoming_batch sib 
 		where node_id = 'w-B0202' and status = 'ER'
 		order by batch_id  desc limit 100
+		
+  - Syncronizar ventas desde workstation. 
+  
+  update pos.receipts set taxamt = taxamt + 000.1;
+  update pos.receipts set taxamt = taxamt - 000.1;
+  update pos.tickets set ticketid = ticketid +1;
+  update pos.tickets set ticketid = ticketid -1;
+  update pos.ticketlines set orgvalue = 'B02t';
+  update pos.ticketlines set orgvalue = 'B02';
+  update pos.payments set orgvalue = 'B02t';
+  update pos.payments set orgvalue = 'B02';
+  update pos.taxlines set amount =amount +1;
+  update pos.taxlines set amount =amount -1;
+  
+  -- ventas sincronizadas
+  select  qtysales,qtyrefund ,host, hostsequence,
+(select count(t.id) from pos.tickets t 
+				join pos.receipts r on r.id = t.id 
+				where t.tickettype  = 0 and r.money = closedcash.money) as sales,
+				(select count(t.id) from pos.tickets t 
+				join pos.receipts r on r.id = t.id 
+				where t.tickettype  = 1 and r.money = closedcash.money) as refund,
+ (select sum(r.grandtotal) from pos.tickets t 
+				join pos.receipts r on r.id = t.id 
+				where t.tickettype  = 0 and r.money = closedcash.money) as totalsales,
+ (select sum(r.grandtotal) from pos.tickets t 
+				join pos.receipts r on r.id = t.id 
+				where t.tickettype  = 1 and r.money = closedcash.money) as totalrefunf				
+ from pos.closedcash  where host = '01' and orgvalue = 'B03';
+  
+  
+  

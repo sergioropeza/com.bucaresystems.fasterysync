@@ -58,8 +58,6 @@ public class BSCA_ImportAllSales extends BSCA_ImportSummarySales{
 				C_Charge_ID = para.get_ValueAsInt("Value");
 			}else if(para.get_ValueAsString("Name").equals("isDateFastery")){
 				isDateStellar =para.get_ValueAsString("Value").equals("Y")?true:false;
-			}else if(para.get_ValueAsString("Name").equals("AD_OrgOrder_ID")){
-				AD_OrgOrder_ID = para.get_ValueAsInt("Value");
 			}else if(para.get_ValueAsString("Name").equals("C_BPartnerDefault_ID")){
 				p_C_BPartnerDefault_ID = para.get_ValueAsInt("Value");
 			}else if(para.get_ValueAsString("Name").equals("isQtyNegate")){
@@ -88,7 +86,8 @@ public class BSCA_ImportAllSales extends BSCA_ImportSummarySales{
 		.addJoinClause("JOIN AD_OrgInfo ON AD_OrgInfo.AD_Org_ID = AD_Org.AD_Org_ID ")
 		.list();
 		for (MOrg mOrg : org) {
-			loadParametersOrg(mOrg.get_ID());
+			AD_Org_ID = mOrg.get_ID();
+			loadParametersOrg(AD_Org_ID);
 			String msj = "";
 			if(!lstPara.isEmpty())
 				msj = importOrders();

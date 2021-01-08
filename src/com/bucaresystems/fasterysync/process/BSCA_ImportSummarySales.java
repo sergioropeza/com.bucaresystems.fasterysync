@@ -64,17 +64,17 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 	protected Trx trx;
 	protected int C_Charge_ID;
 	protected boolean isDateStellar;
-	protected int AD_OrgOrder_ID;
 	protected int p_C_BPartnerDefault_ID;
 	protected int p_C_TaxCategory_ID;
 	protected boolean isQtyNegate;
 	protected int p_C_BankAccount_ID;
 	protected static String NATIVE_MARKER = "NATIVE_"+Database.DB_POSTGRESQL+"_KEYWORK";
 	protected String LIMIT_1 = " "+NATIVE_MARKER + "LIMIT 1"+ NATIVE_MARKER;
-	private int AD_Org_ID;
+	protected int AD_Org_ID;
 	private int M_Warehouse_ID;
 	protected Integer p_LIMIT;
 	private String c_caja;
+	private String c_sucursal;
 	
 	@Override
 	protected void prepare() {
@@ -107,8 +107,6 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 				C_Charge_ID = para[i].getParameterAsInt();
 			}else if(para[i].getParameterName().equals("isDateStellar")){
 				isDateStellar = para[i].getParameterAsBoolean();
-			}else if(para[i].getParameterName().equals("AD_OrgOrder_ID")){
-				AD_OrgOrder_ID = para[i].getParameterAsInt();
 			}else if(para[i].getParameterName().equals("C_BPartnerDefault_ID")){
 				p_C_BPartnerDefault_ID = para[i].getParameterAsInt();
 			}else if(para[i].getParameterName().equals("isQtyNegate")){
@@ -132,10 +130,10 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 			trxName = get_TrxName();	
 			trx = Trx.get(trxName, false);
 		}
-		String c_sucursal = (new MOrg(Env.getCtx(), AD_OrgOrder_ID, null)).getValue();
-		if (!validateSucursal(c_sucursal))
+		c_sucursal = validateSucursal(AD_Org_ID);
+		if (c_sucursal ==null || c_sucursal.isEmpty())
 			return "";
-		UpdateBSCA_Route(c_sucursal);
+		UpdateBSCA_Route();
 
 		
 		String whereBankAccount = "";
@@ -176,22 +174,16 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 		return null;
 	}
 
-	private boolean validateSucursal(String c_sucursal ) {
-		AD_Org_ID = getAD_Org_ID(c_sucursal);
-		M_Warehouse_ID = 0;
-		if (AD_Org_ID==-1){
-			String msj = "ERROR: Organización con código "+c_sucursal+ " no está registrado. ";
+	private String validateSucursal(int  AD_Org_ID ) {
+		
+		M_Warehouse_ID =getM_WarehouseOrg_ID(AD_Org_ID);
+		String c_sucursal = (new MOrg(getCtx(), AD_Org_ID, trxName)).getValue();
+		if(M_Warehouse_ID==-1) {
+			String msj = "ERROR: La Organización "+c_sucursal +" No tiene un almacén configurado.";
 			log.severe(msj);
-			return false;
-		}else{
-			M_Warehouse_ID =getM_WarehouseOrg_ID(AD_Org_ID);
-			if(M_Warehouse_ID==-1) {
-				String msj = "ERROR: La Organización "+c_sucursal +" No tiene un almacén configurado.";
-				log.severe(msj);
-				return false;
-			}
+			return "";
 		}
-		return true;
+		return c_sucursal;
 	}
 
 	private void importOrdersSummary(String closeCash_ID, int BSCA_Route_ID,int C_BankAccount_ID,String orgValue) {
@@ -399,7 +391,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 							}
 						}
 					}
-					createPOSDetaillSummay( closeCash_ID,  orgValue,  ticketType, order);
+					createPOSDetaillSummay( closeCash_ID,  orgValue,  ticketType, order,tickets.getDate());
 					MDocType docTarget_ID = (MDocType)order.getC_DocTypeTarget();					
 					
 					if (docTarget_ID.get_ValueAsBoolean("BSCA_IsCompleitOnImport")){
@@ -476,14 +468,14 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 		return true;
 	}
 
-	private void createPOSDetaillNotSummary( String closedcash_ID, String orgValue, int ticketType,MOrder order){
-		List<BSCA_Tickets> lsttickets = BSCA_Tickets.getTicketsDetaillPaySummary(closedcash_ID, orgValue, ticketType);
+	private void createPOSDetaillNotSummary( String closedcash_ID, String orgValue, int ticketType,MOrder order, Timestamp date){
+		List<BSCA_Tickets> lsttickets = BSCA_Tickets.getTicketsDetaillPaySummary(closedcash_ID, orgValue, ticketType,date);
 		createPOSDetaill(lsttickets,order,ticketType);
 	}
 	
 	
-	private void createPOSDetaillSummay( String closedcash_ID, String orgValue, int ticketType,MOrder order){
-		List<BSCA_Tickets> lstTickets = BSCA_Tickets.getTicketsDetaillNotPaySummary(closedcash_ID, orgValue, ticketType);
+	private void createPOSDetaillSummay( String closedcash_ID, String orgValue, int ticketType,MOrder order, Timestamp date){
+		List<BSCA_Tickets> lstTickets = BSCA_Tickets.getTicketsDetaillNotPaySummary(closedcash_ID, orgValue, ticketType,date);
 		createPOSDetaill(lstTickets,order,ticketType);
 		
 	
@@ -720,7 +712,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						log.warning("Orden estelar: "+documentNo);
 						log.warning("Tercero: "+bPartnerValue);
 															
-						createPOSDetaillNotSummary( closeCash_ID,  orgValue,  ticketType, order);
+						createPOSDetaillNotSummary( closeCash_ID,  orgValue,  ticketType, order,ticket.getDate());
 						
 						//sincroniza las lineas de las ordenes 
 						error = false;
@@ -944,7 +936,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 		DB.executeUpdateEx(sqlTotals,trxName);	
 		trx.commit();
 	}
-private void UpdateBSCA_Route(String c_sucursal ){
+	private void UpdateBSCA_Route(){
 		
 		String sql = null;
 		ResultSet rsCaja = null;
@@ -952,7 +944,7 @@ private void UpdateBSCA_Route(String c_sucursal ){
 
 		try{
 
-			List<BSCA_ClosedCash> lstClosedCash = BSCA_ClosedCash.getListClosedCash();
+			List<BSCA_ClosedCash> lstClosedCash = BSCA_ClosedCash.getListClosedCash(c_sucursal);
 			
 			for (BSCA_ClosedCash closedCash : lstClosedCash) {
 				int BSCA_Route_ID = closedCash.getBSCA_Route_ID();
