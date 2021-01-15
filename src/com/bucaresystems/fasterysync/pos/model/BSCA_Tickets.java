@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.compiere.model.PO;
 import org.compiere.util.DB;
 
 public class BSCA_Tickets {
@@ -130,6 +131,77 @@ public class BSCA_Tickets {
 	}
 	
 	
+	public static List<BSCA_PaymentInstaPago> getPaymentVPOS(PO route, String orgValue, String host){
+		
+		ResultSet rs = null;
+		PreparedStatement pstmt = null;
+		Timestamp startDate = Timestamp.valueOf(route.get_ValueAsString("startDate"));
+		Timestamp endDate = Timestamp.valueOf(route.get_ValueAsString("endDate"));
+		
+		List<BSCA_PaymentInstaPago> lst = new ArrayList<BSCA_PaymentInstaPago>();	
+				
+		String sql = "select * from pos.bsca_paymentinstapago bp \n" + 
+				"where to_timestamp(bp.datetime, 'MM-dd-YYYY HH24:mi:ss AM')::timestamp >= ? "
+				+ "and to_timestamp(bp.datetime, 'MM-dd-YYYY HH24:mi:ss AM')::timestamp <= ? and bp.orgvalue = ?\n" + 
+				"and bp.host  = ?";
+		try {
+			pstmt = DB.prepareStatement(sql, null);
+			
+			pstmt.setTimestamp(1, startDate);
+			pstmt.setTimestamp(2, endDate);
+			pstmt.setString(3, orgValue);
+			pstmt.setString(4, host);
+			
+			rs = pstmt.executeQuery();
+			while(rs.next()){
+				 BSCA_PaymentInstaPago paymentVPOS = new BSCA_PaymentInstaPago();	
+			 	 paymentVPOS.setDeferre(rs.getString("deferre"));
+				 paymentVPOS.setCode(rs.getString("code"));
+				 paymentVPOS.setCardholderidL(rs.getString("cardholderidL"));
+				 paymentVPOS.setVoucher(rs.getString("voucher"));
+				 paymentVPOS.setLote(rs.getString("lote"));
+				 paymentVPOS.setDescription(rs.getString("description"));
+				 paymentVPOS.setCardline(rs.getString("cardline"));
+				 paymentVPOS.setTsi(rs.getString("tsi"));
+				 paymentVPOS.setCommerce(rs.getString("commerce"));
+				 paymentVPOS.setDatetime(rs.getString("datetime"));
+				 paymentVPOS.setOrdernumber(rs.getString("ordernumber"));
+				 paymentVPOS.setId(rs.getString("id"));
+				 paymentVPOS.setCardtype(rs.getString("cardtype"));
+				 paymentVPOS.setIdmerchant(rs.getString("idmerchant"));
+				 paymentVPOS.setResponsecode(rs.getString("responsecode"));
+				 paymentVPOS.setAmount(rs.getString("amount"));
+				 paymentVPOS.setApproval(rs.getString("approval"));
+				 paymentVPOS.setTerminal(rs.getString("terminal"));
+				 paymentVPOS.setMessage(rs.getString("message"));
+				 paymentVPOS.setAuthid(rs.getString("authid"));
+				 paymentVPOS.setArqc(rs.getString("arqc"));
+				 paymentVPOS.setTc(rs.getString("tc"));
+				 paymentVPOS.setSequence(rs.getString("sequence"));
+				 paymentVPOS.setTvr(rs.getString("tvr"));
+				 paymentVPOS.setNa(rs.getString("na"));
+				 paymentVPOS.setSuccess(rs.getString("success"));
+				 paymentVPOS.setName(rs.getString("name"));
+				 paymentVPOS.setCardnumber(rs.getString("cardnumber"));
+				 paymentVPOS.setAid(rs.getString("aid"));
+				 paymentVPOS.setBank(rs.getString("bank"));
+				 paymentVPOS.setReference(rs.getString("reference"));
+				 paymentVPOS.setOrgValue(rs.getString("orgValue"));
+				 paymentVPOS.setJson(rs.getString("json"));
+				 paymentVPOS.setHost(rs.getString("host"));
+	  			 lst.add(paymentVPOS);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		
+		return lst;
+	}
 	public static List<BSCA_Tickets> getTicketsSummaryNotImported(String closedcash_ID, String orgvalue){
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
@@ -186,7 +258,7 @@ public class BSCA_Tickets {
 				" t.ticketid, t.id, c.taxid, c.address, c.\"name\" \n" + 
 				" FROM pos.tickets t\n" + 
 				" JOIN pos.receipts r ON r.id = t.id \n" + 
-				" join pos.customers c  on t.customer  = c.id \n" + 
+				" left join pos.customers c  on t.customer  = c.id \n" + 
 				" where\n" + 
 				" r.money = '"+closedcash_ID+"' and \n" + 
 				" r.bsca_isimported = false and r.orgvalue  = '"+orgValue+"' and  t.tickettype = " +ticketType + " and date_trunc('day', r.datenew) = '"+dateTicket+"'"+
@@ -238,7 +310,7 @@ public class BSCA_Tickets {
 				" t.ticketid, t.id, c.taxid, c.address, c.\"name\" \n" + 
 				" FROM pos.tickets t\n" + 
 				" JOIN pos.receipts r ON r.id = t.id \n" + 
-				" join pos.customers c  on t.customer  = c.id \n" + 
+				" left join pos.customers c  on t.customer  = c.id \n" + 
 				" where\n" + 
 				" r.money = '"+closedcash_ID+"' and \n" + 
 				" r.bsca_isimported = false and r.orgvalue  = '"+orgValue+"' \n" + 

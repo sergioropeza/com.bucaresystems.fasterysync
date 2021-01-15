@@ -27,20 +27,23 @@
 
 - Check out data error and fix it. 
    
-   select batch_id , node_id , status, sql_message  from sym_outgoing_batch where error_flag=1;
+   select batch_id , node_id , status, sql_message  from symmetricds.sym_outgoing_batch where error_flag=1;
    
-   select batch_id , node_id ,channel_id status, sql_message  from sym_outgoing_batch where status <> 'OK'
+   select batch_id , node_id ,channel_id,status, sql_message  from sym_outgoing_batch where status <> 'OK';
    
    select * from symmetricds.sym_data where data_id in
-   (select data_id from symmetricds.sym_data_event where batch_id='1731');
+   (select data_id from symmetricds.sym_data_event where batch_id='4512');
   
    select * from sym_data where data_id in
     (select failed_data_id from sym_outgoing_batch where batch_id='34');
+    
+    select batch_id , node_id ,channel_id,status, sql_message, last_update_time  
+from symmetricds.sym_outgoing_batch order by batch_id  desc limit 100
    
    
    
-   delete from symmetricds.sym_data_event where batch_id='12795';
-  update symmetricds.sym_outgoing_batch set status='OK' where batch_id= '1731';
+   delete from symmetricds.sym_data_event where batch_id in (select batch_id from sym_outgoing_batch where status = 'ER');
+  update symmetricds.sym_outgoing_batch set status='OK', error_flag = 0 where status= 'ER';
    
 - Backup Data Base
  
@@ -57,7 +60,7 @@
    
 - Restore Data base for Docker
    
-   cat ExpDat.dmp | docker exec -i my-postgres4 psql -U adempiere -d idempiere_boga04012021
+   cat ExpDat.dmp | docker exec -i my-postgres4 psql -U adempiere -d idempiere_boga12012021
    
  - Check error data incoming symmetricds
  

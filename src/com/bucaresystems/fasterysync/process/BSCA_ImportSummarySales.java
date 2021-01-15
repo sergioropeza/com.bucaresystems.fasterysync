@@ -40,6 +40,7 @@ import com.bucaresystems.fasterysync.base.CustomProcess;
 import com.bucaresystems.fasterysync.model.X_BSCA_POSDetaill;
 import com.bucaresystems.fasterysync.model.X_BSCA_POSTaxDetaill;
 import com.bucaresystems.fasterysync.pos.model.BSCA_ClosedCash;
+import com.bucaresystems.fasterysync.pos.model.BSCA_PaymentInstaPago;
 import com.bucaresystems.fasterysync.pos.model.BSCA_Payments;
 import com.bucaresystems.fasterysync.pos.model.BSCA_SummaryTax;
 import com.bucaresystems.fasterysync.pos.model.BSCA_Tax;
@@ -142,9 +143,9 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 //			 whereBankAccount = " and C_BankAccount.value = '"+value+"'";
 //		}
 			
-		List<PO> lstBSCA_Route = new Query(getCtx(), "BSCA_Route", " C_DocTypeTarget_ID =?  and ClosedCashID IN ("
-				+ "select distinct money from pos.receipts where bsca_Isimported = false) "+whereBankAccount , trxName).
-				setParameters(C_DocTypeLot_ID).setOrderBy("StartDate, AD_Org_ID,C_BankAccount_ID").list();
+		List<PO> lstBSCA_Route = new Query(getCtx(), "BSCA_Route", " C_DocTypeTarget_ID =?  and AD_Org_ID = ? and ClosedCashID IN ("
+				+ "select distinct money from pos.receipts where bsca_Isimported = false and orgValue = ?) "+whereBankAccount , trxName).
+				setParameters(C_DocTypeLot_ID,AD_Org_ID,c_sucursal).setOrderBy("StartDate, AD_Org_ID,C_BankAccount_ID").list();
 			
 		
 		forRoutes: for (PO route : lstBSCA_Route) {
@@ -160,7 +161,12 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						
 			            //// VALIDA QUE TODOS LOS REGISTROS DE TICKETS SE HAYAN SINCRONIZADO /////////////////////////
 						if (!isAllSales(route))
-							continue forRoutes;					
+							continue forRoutes;	
+						
+						List<BSCA_PaymentInstaPago> lstPaymentVPOS = BSCA_Tickets.getPaymentVPOS(route, c_sucursal, c_caja);
+						lstPaymentVPOS.forEach((paymentVPOS) ->{
+							System.out.println(paymentVPOS.getBank());
+						});
 						
 						importOrdersNotSummary(closedCash,BSCA_Route_ID, C_BankAccount_ID, c_sucursal);
 						if (isActive) 
@@ -168,6 +174,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 
 						////// Importa las ordernes resumidas 
 						updateFieldsSumNCSumInvoiced(BSCA_Route_ID);
+						
 						
 					}
 	
@@ -478,7 +485,6 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 		List<BSCA_Tickets> lstTickets = BSCA_Tickets.getTicketsDetaillNotPaySummary(closedcash_ID, orgValue, ticketType,date);
 		createPOSDetaill(lstTickets,order,ticketType);
 		
-	
 	}
 
 	private void createPOSDetaill(List<BSCA_Tickets> lstTickets, MOrder order, int ticketType){
