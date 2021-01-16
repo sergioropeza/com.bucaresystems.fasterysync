@@ -33,5 +33,6 @@ CREATE TABLE pos.bsca_paymentinstapago (
 	orgvalue varchar NOT NULL,
 	json varchar NULL,
 	host varchar NULL,
+	bsca_isimported bool NOT NULL DEFAULT false,
 	CONSTRAINT bsca_paymentinstapago_pkey PRIMARY KEY (id, orgvalue,host)
 );

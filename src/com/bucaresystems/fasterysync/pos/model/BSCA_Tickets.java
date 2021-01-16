@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.compiere.model.PO;
+import org.compiere.util.CPreparedStatement;
 import org.compiere.util.DB;
 
 public class BSCA_Tickets {
@@ -140,10 +141,10 @@ public class BSCA_Tickets {
 		
 		List<BSCA_PaymentInstaPago> lst = new ArrayList<BSCA_PaymentInstaPago>();	
 				
-		String sql = "select * from pos.bsca_paymentinstapago bp \n" + 
+		String sql = "select *,to_timestamp(bp.datetime, 'MM-dd-YYYY HH24:mi:ss AM')::timestamp as dateTrx from pos.bsca_paymentinstapago bp \n" + 
 				"where to_timestamp(bp.datetime, 'MM-dd-YYYY HH24:mi:ss AM')::timestamp >= ? "
-				+ "and to_timestamp(bp.datetime, 'MM-dd-YYYY HH24:mi:ss AM')::timestamp <= ? and bp.orgvalue = ?\n" + 
-				"and bp.host  = ?";
+				+" and to_timestamp(bp.datetime, 'MM-dd-YYYY HH24:mi:ss AM')::timestamp <= ? and bp.orgvalue = ?\n" + 
+				" and bp.host  = ?";
 		try {
 			pstmt = DB.prepareStatement(sql, null);
 			
@@ -164,7 +165,7 @@ public class BSCA_Tickets {
 				 paymentVPOS.setCardline(rs.getString("cardline"));
 				 paymentVPOS.setTsi(rs.getString("tsi"));
 				 paymentVPOS.setCommerce(rs.getString("commerce"));
-				 paymentVPOS.setDatetime(rs.getString("datetime"));
+				 paymentVPOS.setDatetime(rs.getTimestamp("datetrx"));
 				 paymentVPOS.setOrdernumber(rs.getString("ordernumber"));
 				 paymentVPOS.setId(rs.getString("id"));
 				 paymentVPOS.setCardtype(rs.getString("cardtype"));
@@ -202,6 +203,74 @@ public class BSCA_Tickets {
 		
 		return lst;
 	}
+	
+	public static List<BSCA_PaymentInstaPago> getPaymentVPOSNotImported(){
+			
+		List<BSCA_PaymentInstaPago> lst = new ArrayList<BSCA_PaymentInstaPago>();	
+				
+		String sql = "select bp.*, br.bsca_route_id,to_timestamp(bp.datetime, 'MM-dd-YYYY HH24:mi:ss AM')::timestamp as dateTrx  from pos.bsca_paymentinstapago bp \n" + 
+				"left join pos.closedcash c on c.hostsequence::text  = bp.ordernumber and c.orgvalue  = bp.orgvalue and c.host  = bp.host \n" + 
+				"left join bsca_route br  on br.closedcashid  = c.money \n" + 
+				"where bsca_isimported = false ";
+		CPreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			pstmt = DB.prepareStatement(sql, null);
+		
+			
+			rs = pstmt.executeQuery();
+			while(rs.next()){
+				 BSCA_PaymentInstaPago paymentVPOS = new BSCA_PaymentInstaPago();	
+			 	 paymentVPOS.setDeferre(rs.getString("deferre"));
+				 paymentVPOS.setCode(rs.getString("code"));
+				 paymentVPOS.setCardholderidL(rs.getString("cardholderidL"));
+				 paymentVPOS.setVoucher(rs.getString("voucher"));
+				 paymentVPOS.setLote(rs.getString("lote"));
+				 paymentVPOS.setDescription(rs.getString("description"));
+				 paymentVPOS.setCardline(rs.getString("cardline"));
+				 paymentVPOS.setTsi(rs.getString("tsi"));
+				 paymentVPOS.setCommerce(rs.getString("commerce"));
+				 paymentVPOS.setDatetime(rs.getTimestamp("dateTrx"));
+				 paymentVPOS.setOrdernumber(rs.getString("ordernumber"));
+				 paymentVPOS.setId(rs.getString("id"));
+				 paymentVPOS.setCardtype(rs.getString("cardtype"));
+				 paymentVPOS.setIdmerchant(rs.getString("idmerchant"));
+				 paymentVPOS.setResponsecode(rs.getString("responsecode"));
+				 paymentVPOS.setAmount(rs.getString("amount"));
+				 paymentVPOS.setApproval(rs.getString("approval"));
+				 paymentVPOS.setTerminal(rs.getString("terminal"));
+				 paymentVPOS.setMessage(rs.getString("message"));
+				 paymentVPOS.setAuthid(rs.getString("authid"));
+				 paymentVPOS.setArqc(rs.getString("arqc"));
+				 paymentVPOS.setTc(rs.getString("tc"));
+				 paymentVPOS.setSequence(rs.getString("sequence"));
+				 paymentVPOS.setTvr(rs.getString("tvr"));
+				 paymentVPOS.setNa(rs.getString("na"));
+				 paymentVPOS.setSuccess(rs.getString("success"));
+				 paymentVPOS.setName(rs.getString("name"));
+				 paymentVPOS.setCardnumber(rs.getString("cardnumber"));
+				 paymentVPOS.setAid(rs.getString("aid"));
+				 paymentVPOS.setBank(rs.getString("bank"));
+				 paymentVPOS.setReference(rs.getString("reference"));
+				 paymentVPOS.setOrgValue(rs.getString("orgValue"));
+				 paymentVPOS.setJson(rs.getString("json"));
+				 paymentVPOS.setHost(rs.getString("host"));
+				 paymentVPOS.setBSCA_Route_ID(rs.getInt("BSCA_Route_ID"));
+	  			 lst.add(paymentVPOS);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		
+		return lst;
+	}
+
 	public static List<BSCA_Tickets> getTicketsSummaryNotImported(String closedcash_ID, String orgvalue){
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;

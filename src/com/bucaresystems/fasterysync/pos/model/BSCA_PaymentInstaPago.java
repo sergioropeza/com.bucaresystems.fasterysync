@@ -5,6 +5,8 @@
  */
 package com.bucaresystems.fasterysync.pos.model;
 
+import java.sql.Timestamp;
+
 /**
  *
  * @author soropeza
@@ -20,7 +22,7 @@ public class BSCA_PaymentInstaPago {
     private String  cardline;
     private String  tsi;
     private String  commerce;
-    private String  datetime;
+    private Timestamp  datetime;
     private String  ordernumber;
     private String  id;
     private String  cardtype;
@@ -45,6 +47,7 @@ public class BSCA_PaymentInstaPago {
     private String  orgValue;
     private String  json;
     public String  host;
+    public int BSCA_Route_ID;
 
     /**
      * @return the deferre
@@ -178,15 +181,15 @@ public class BSCA_PaymentInstaPago {
     /**
      * @return the datetime
      */
-    public String getDatetime() {
-        return datetime==null?"":datetime;
+    public Timestamp getDatetime() {
+        return datetime;
 
     }
 
     /**
      * @param datetime the datetime to set
      */
-    public void setDatetime(String datetime) {
+    public void setDatetime(Timestamp datetime) {
         this.datetime = datetime;
     }
 
@@ -552,6 +555,14 @@ public class BSCA_PaymentInstaPago {
     public void setHost(String host) {
         this.host = host;
     }
+
+	public int getBSCA_Route_ID() {
+		return BSCA_Route_ID;
+	}
+
+	public void setBSCA_Route_ID(int bSCA_Route_ID) {
+		BSCA_Route_ID = bSCA_Route_ID;
+	}
     
     
     

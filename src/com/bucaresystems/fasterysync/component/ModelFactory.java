@@ -19,9 +19,12 @@
 package com.bucaresystems.fasterysync.component;
 
 import com.bucaresystems.fasterysync.base.CustomModelFactory;
+import com.bucaresystems.fasterysync.model.X_BSCA_BINBank;
 import com.bucaresystems.fasterysync.model.X_BSCA_POSDetaill;
 import com.bucaresystems.fasterysync.model.X_BSCA_POSTaxDetaill;
 import com.bucaresystems.fasterysync.model.X_BSCA_SyncInvoice_Para;
+import com.bucaresystems.fasterysync.model.X_T_BSCA_CloseVPOSHeader;
+import com.bucaresystems.fasterysync.model.X_T_BSCA_CloseVPOSLine;
 
 /**
  * Model Factory
@@ -42,6 +45,9 @@ public class ModelFactory extends CustomModelFactory {
 		registerModel(X_BSCA_SyncInvoice_Para.Table_Name, X_BSCA_SyncInvoice_Para.class);
 		registerModel(X_BSCA_POSTaxDetaill.Table_Name, X_BSCA_POSTaxDetaill.class);
 		registerModel(X_BSCA_POSDetaill.Table_Name, X_BSCA_POSDetaill.class);
+		registerModel(X_T_BSCA_CloseVPOSHeader.Table_Name, X_T_BSCA_CloseVPOSHeader.class);
+		registerModel(X_T_BSCA_CloseVPOSLine.Table_Name, X_T_BSCA_CloseVPOSLine.class);
+		registerModel(X_BSCA_BINBank.Table_Name, X_BSCA_BINBank.class);
 	}
 
 }

@@ -39,6 +39,7 @@ import org.compiere.util.Trx;
 import com.bucaresystems.fasterysync.base.CustomProcess;
 import com.bucaresystems.fasterysync.model.X_BSCA_POSDetaill;
 import com.bucaresystems.fasterysync.model.X_BSCA_POSTaxDetaill;
+import com.bucaresystems.fasterysync.model.X_T_BSCA_CloseVPOSLine;
 import com.bucaresystems.fasterysync.pos.model.BSCA_ClosedCash;
 import com.bucaresystems.fasterysync.pos.model.BSCA_PaymentInstaPago;
 import com.bucaresystems.fasterysync.pos.model.BSCA_Payments;
@@ -163,22 +164,37 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						if (!isAllSales(route))
 							continue forRoutes;	
 						
-						List<BSCA_PaymentInstaPago> lstPaymentVPOS = BSCA_Tickets.getPaymentVPOS(route, c_sucursal, c_caja);
-						lstPaymentVPOS.forEach((paymentVPOS) ->{
-							System.out.println(paymentVPOS.getBank());
-						});
-						
 						importOrdersNotSummary(closedCash,BSCA_Route_ID, C_BankAccount_ID, c_sucursal);
 						if (isActive) 
 							importOrdersSummary(closedCash,BSCA_Route_ID, C_BankAccount_ID, c_sucursal);
 
 						////// Importa las ordernes resumidas 
 						updateFieldsSumNCSumInvoiced(BSCA_Route_ID);
-						
-						
+											
 					}
+		createPaymentVPOS();
 	
 		return null;
+	}
+
+	private void createPaymentVPOS() {
+		List<BSCA_PaymentInstaPago> lstPaymentVPOS = BSCA_Tickets.getPaymentVPOSNotImported();
+		for (BSCA_PaymentInstaPago instaPago : lstPaymentVPOS) {
+			X_T_BSCA_CloseVPOSLine vPosLine = new X_T_BSCA_CloseVPOSLine(getCtx(), 0, trxName);
+			vPosLine.setC_BankTo_ID(getC_Bank_ID(instaPago.getBank()));
+			vPosLine.setTerminalValue(instaPago.getTerminal());
+			vPosLine.setDateTrx(instaPago.getDatetime());
+			vPosLine.setLotValue(instaPago.getLote());
+			vPosLine.setSeqValue(instaPago.getSequence());
+			vPosLine.setRefValue(instaPago.getReference());
+			vPosLine.setCardValue(instaPago.getCardnumber());
+			vPosLine.set_ValueOfColumn("BSCA_Route_ID", instaPago.getBSCA_Route_ID());
+		}
+		
+	}
+	
+	private int getC_Bank_ID (String bankValue) {
+		return DB.getSQLValueEx(trxName, "select C_Bank_ID C_Bank where RoutingNo = '"+bankValue+"' and isActive = 'Y'");
 	}
 
 	private String validateSucursal(int  AD_Org_ID ) {
