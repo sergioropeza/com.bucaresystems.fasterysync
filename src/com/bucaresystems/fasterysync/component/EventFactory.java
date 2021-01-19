@@ -29,6 +29,7 @@ import org.compiere.model.MUser;
 import org.compiere.model.X_C_POSTenderType;
 
 import com.bucaresystems.fasterysync.base.CustomEventFactory;
+import com.bucaresystems.fasterysync.event.BSCA_ECloseVPosline;
 import com.bucaresystems.fasterysync.event.BSCA_EConversionRate;
 import com.bucaresystems.fasterysync.event.BSCA_ECurrency;
 import com.bucaresystems.fasterysync.event.BSCA_EPosTenderType;
@@ -38,9 +39,11 @@ import com.bucaresystems.fasterysync.event.BSCA_EProductOrg;
 import com.bucaresystems.fasterysync.event.BSCA_EProductPrice;
 import com.bucaresystems.fasterysync.event.BSCA_EProductValue;
 import com.bucaresystems.fasterysync.event.BSCA_ERolPos;
+import com.bucaresystems.fasterysync.event.BSCA_ERoute;
 import com.bucaresystems.fasterysync.event.BSCA_ETax;
 import com.bucaresystems.fasterysync.event.BSCA_ETaxCategory;
 import com.bucaresystems.fasterysync.event.BSCA_EUser;
+import com.bucaresystems.fasterysync.model.X_T_BSCA_CloseVPOSLine;
 
 /**
  * Event Factory
@@ -82,7 +85,10 @@ public class EventFactory extends CustomEventFactory {
 		registerEvent(IEventTopics.PO_AFTER_NEW, X_C_POSTenderType.Table_Name,BSCA_EPosTenderType.class);
 		registerEvent(IEventTopics.PO_AFTER_CHANGE, "BSCA_Conversion_Rate", BSCA_EConversionRate.class);	
 		registerEvent(IEventTopics.PO_AFTER_NEW,"BSCA_Conversion_Rate",BSCA_EConversionRate.class);
-
+		registerEvent(IEventTopics.PO_AFTER_NEW,"BSCA_Conversion_Rate",BSCA_EConversionRate.class);
+		registerEvent(IEventTopics.PO_BEFORE_DELETE,X_T_BSCA_CloseVPOSLine.Table_Name,BSCA_ECloseVPosline.class);
+		registerEvent(IEventTopics.PO_BEFORE_DELETE,"BSCA_Route",BSCA_ERoute.class);
+		
 	}
 
 }

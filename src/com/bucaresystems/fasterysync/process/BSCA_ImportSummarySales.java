@@ -172,29 +172,78 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						updateFieldsSumNCSumInvoiced(BSCA_Route_ID);
 											
 					}
-		createPaymentVPOS();
 	
 		return null;
 	}
 
-	private void createPaymentVPOS() {
+	protected void createPaymentVPOS() {
 		List<BSCA_PaymentInstaPago> lstPaymentVPOS = BSCA_Tickets.getPaymentVPOSNotImported();
 		for (BSCA_PaymentInstaPago instaPago : lstPaymentVPOS) {
-			X_T_BSCA_CloseVPOSLine vPosLine = new X_T_BSCA_CloseVPOSLine(getCtx(), 0, trxName);
-			vPosLine.setC_BankTo_ID(getC_Bank_ID(instaPago.getBank()));
-			vPosLine.setTerminalValue(instaPago.getTerminal());
-			vPosLine.setDateTrx(instaPago.getDatetime());
-			vPosLine.setLotValue(instaPago.getLote());
-			vPosLine.setSeqValue(instaPago.getSequence());
-			vPosLine.setRefValue(instaPago.getReference());
-			vPosLine.setCardValue(instaPago.getCardnumber());
-			vPosLine.set_ValueOfColumn("BSCA_Route_ID", instaPago.getBSCA_Route_ID());
+			try {
+				String cardNumber = instaPago.getCardnumber();
+				Integer bni_id = getCodeBNI(cardNumber);
+				int bsca_route_id =  instaPago.getBSCA_Route_ID();
+				int C_BankTo_ID = getC_Bank_ID(instaPago.getBank());
+				Timestamp dateTrx = instaPago.getDatetime();
+				int org_ID = getAD_Org_ID(instaPago.getOrgValue());
+				Double amt = Double.parseDouble(instaPago.getIdmerchant());
+				if (bsca_route_id==-1) {
+					bsca_route_id = getBSCA_Route_IDForVPOS(dateTrx, org_ID, instaPago.getHost());
+				}
+				if (bsca_route_id!=-1) {
+					X_T_BSCA_CloseVPOSLine vPosLine = new X_T_BSCA_CloseVPOSLine(getCtx(), 0, trxName);
+					vPosLine.setC_BankTo_ID(C_BankTo_ID);
+					vPosLine.setTerminalValue(instaPago.getTerminal());
+					vPosLine.setDateTrx(dateTrx);
+					vPosLine.setLotValue(instaPago.getLote());
+					vPosLine.setSeqValue(instaPago.getSequence());
+					vPosLine.setRefValue(instaPago.getReference());
+					vPosLine.setCardValue(instaPago.getCardnumber());
+					if (bni_id!=null)
+						vPosLine.setBSCA_BINBank_ID(bni_id);
+					vPosLine.setAD_Org_ID(org_ID);
+					vPosLine.setAmt(new BigDecimal(amt));
+					vPosLine.setAffiliateValue(instaPago.getIdmerchant());
+					vPosLine.set_ValueOfColumn("BSCA_Route_ID", bsca_route_id);
+					vPosLine.set_ValueOfColumn("fasteryID", instaPago.getId());
+					vPosLine.saveEx();
+					
+					String sql = "update pos.bsca_paymentinstapago set bsca_isimported  = true where id = '"+instaPago.getId()+"'";
+					DB.executeUpdateEx(sql, trxName);
+					trx.commit();
+				}else {
+					log.severe("ERROR: Registro instapago con id : "+instaPago.getId() +" no importado. No tienen turno asignado");
+				}
+			}catch (Exception e){
+				log.severe("ERROR:"+e.getMessage());
+			}
 		}
 		
 	}
 	
+	private int getBSCA_Route_IDForVPOS(Timestamp dateTrx, int org_ID, String host) {
+ 
+		int c_bankaccount_id = getC_BankAccount_ID(host, org_ID);
+		String sql = "select bsca_route_id  from bsca_route r where "+
+		"r.startdate <= '"+dateTrx+"'  and '"+dateTrx+"'< r.enddate and r.AD_Org_ID = "+org_ID+" and r.c_bankaccount_id = "+c_bankaccount_id;
+
+		return DB.getSQLValueEx(trxName, sql);
+	}
+	
+	private int getAD_Org_ID(String value) {
+		return DB.getSQLValueEx(trxName, "select AD_Org_ID from AD_org where value = '"+value+"' and isActive = 'Y'");
+	}
+	private Integer getCodeBNI(String cardNumber) {
+		if (cardNumber==null || cardNumber.isEmpty())
+			return null;
+		String bni = cardNumber.substring(0, 6);
+		return DB.getSQLValueEx(trxName, "select BSCA_BINBank_ID from BSCA_BINBank where value = '"+bni+"' and isActive = 'Y'");
+	}
 	private int getC_Bank_ID (String bankValue) {
-		return DB.getSQLValueEx(trxName, "select C_Bank_ID C_Bank where RoutingNo = '"+bankValue+"' and isActive = 'Y'");
+		if (bankValue==null || bankValue.isEmpty())
+			bankValue = "0000";
+		String sql = "select C_Bank_ID from C_Bank where RoutingNo = '"+bankValue+"' and isActive = 'Y' and ismerchantbank  = 'Y'";
+		return DB.getSQLValueEx(trxName, sql);
 	}
 
 	private String validateSucursal(int  AD_Org_ID ) {
@@ -310,8 +359,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 						}
 							
 						MProduct mProduct = new MProduct(getCtx(), M_Product_ID, trxName);
-						
-			
+	
 						int C_Tax_ID = Integer.parseInt(taxID);
 						BSCA_Tax tax = new BSCA_Tax(getCtx(), C_Tax_ID, trxName);
 						
@@ -1064,9 +1112,6 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 		return DB.getNextID(Env.getAD_Client_ID(getCtx()), "BSCA_Route", trxName);
 	}
 
-	private int getAD_Org_ID(String c_localidad) {
-		return DB.getSQLValueEx(trxName, "Select AD_Org_ID from AD_Org where value = '"+c_localidad +"'");
-	}
 	
 	private int getM_WarehouseOrg_ID(Integer AD_Org_ID) {
 		return DB.getSQLValueEx(trxName, "select M_Warehouse_ID FROM AD_OrgInfo where AD_Org_ID = "+AD_Org_ID);

@@ -93,6 +93,7 @@ public class BSCA_ImportAllSales extends BSCA_ImportSummarySales{
 				msj = importOrders();
 			sbMjs.append(msj);
 		}
+		createPaymentVPOS();
 		
 		return sbMjs.toString();
 	}

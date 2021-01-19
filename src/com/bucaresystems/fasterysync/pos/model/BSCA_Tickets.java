@@ -208,7 +208,7 @@ public class BSCA_Tickets {
 			
 		List<BSCA_PaymentInstaPago> lst = new ArrayList<BSCA_PaymentInstaPago>();	
 				
-		String sql = "select bp.*, br.bsca_route_id,to_timestamp(bp.datetime, 'MM-dd-YYYY HH24:mi:ss AM')::timestamp as dateTrx  from pos.bsca_paymentinstapago bp \n" + 
+		String sql = "select bp.*,coalesce (br.bsca_route_id,-1) as bsca_route_ID,to_timestamp(bp.datetime, 'MM-dd-YYYY HH24:mi:ss AM')::timestamp as dateTrx  from pos.bsca_paymentinstapago bp \n" + 
 				"left join pos.closedcash c on c.hostsequence::text  = bp.ordernumber and c.orgvalue  = bp.orgvalue and c.host  = bp.host \n" + 
 				"left join bsca_route br  on br.closedcashid  = c.money \n" + 
 				"where bsca_isimported = false ";
@@ -217,8 +217,7 @@ public class BSCA_Tickets {
 		
 		try {
 			pstmt = DB.prepareStatement(sql, null);
-		
-			
+					
 			rs = pstmt.executeQuery();
 			while(rs.next()){
 				 BSCA_PaymentInstaPago paymentVPOS = new BSCA_PaymentInstaPago();	
