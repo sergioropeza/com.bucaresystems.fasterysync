@@ -186,7 +186,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 				int C_BankTo_ID = getC_Bank_ID(instaPago.getBank());
 				Timestamp dateTrx = instaPago.getDatetime();
 				int org_ID = getAD_Org_ID(instaPago.getOrgValue());
-				Double amt = Double.parseDouble(instaPago.getIdmerchant());
+				Double amt = Double.parseDouble(instaPago.getAmount().replaceAll(",", ""));
 				if (bsca_route_id==-1) {
 					bsca_route_id = getBSCA_Route_IDForVPOS(dateTrx, org_ID, instaPago.getHost());
 				}

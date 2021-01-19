@@ -15,8 +15,7 @@ public class BSCA_ECloseVPosline extends CustomEvent{
 			String instaPago_ID = po.get_ValueAsString("fasteryID");
 			String sql = "update pos.bsca_paymentinstapago set bsca_isimported  = false where id = '"+instaPago_ID+"'";
 			DB.executeUpdateEx(sql, po.get_TrxName());		
-		}
-		
+		}		
 	}
 
 }
