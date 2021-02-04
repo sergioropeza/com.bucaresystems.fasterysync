@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -16,6 +17,7 @@ import org.compiere.db.Database;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MBankAccount;
+import org.compiere.model.MColumn;
 import org.compiere.model.MDocType;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
@@ -37,6 +39,7 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Trx;
 
 import com.bucaresystems.fasterysync.base.CustomProcess;
+import com.bucaresystems.fasterysync.model.X_BSCA_BINBank;
 import com.bucaresystems.fasterysync.model.X_BSCA_POSDetaill;
 import com.bucaresystems.fasterysync.model.X_BSCA_POSTaxDetaill;
 import com.bucaresystems.fasterysync.model.X_T_BSCA_CloseVPOSLine;
@@ -77,6 +80,9 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 	protected Integer p_LIMIT;
 	private String c_caja;
 	private String c_sucursal;
+	private static HashMap<String,String> s_cache = new HashMap<String,String>();
+	private int CarLineColumn_ID = MColumn.getColumn_ID("PaymentVPOS_Setup", "CardLine");
+	private int CarTypeColumn_ID = MColumn.getColumn_ID("PaymentVPOS_Setup", "CardType");
 	
 	@Override
 	protected void prepare() {
@@ -163,7 +169,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 			            //// VALIDA QUE TODOS LOS REGISTROS DE TICKETS SE HAYAN SINCRONIZADO /////////////////////////
 						if (!isAllSales(route))
 							continue forRoutes;	
-						
+					
 						importOrdersNotSummary(closedCash,BSCA_Route_ID, C_BankAccount_ID, c_sucursal);
 						if (isActive) 
 							importOrdersSummary(closedCash,BSCA_Route_ID, C_BankAccount_ID, c_sucursal);
@@ -177,6 +183,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 	}
 
 	protected void createPaymentVPOS() {
+		System.out.println("e");
 		List<BSCA_PaymentInstaPago> lstPaymentVPOS = BSCA_Tickets.getPaymentVPOSNotImported();
 		for (BSCA_PaymentInstaPago instaPago : lstPaymentVPOS) {
 			try {
@@ -184,6 +191,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 				Integer bni_id = getCodeBNI(cardNumber);
 				int bsca_route_id =  instaPago.getBSCA_Route_ID();
 				int C_BankTo_ID = getC_Bank_ID(instaPago.getBank());
+				String tenderType = getPosTenderType(instaPago.getCardline(), instaPago.getCardtype());
 				Timestamp dateTrx = instaPago.getDatetime();
 				int org_ID = getAD_Org_ID(instaPago.getOrgValue());
 				Double amt = Double.parseDouble(instaPago.getAmount().replaceAll(",", ""));
@@ -199,6 +207,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 					vPosLine.setSeqValue(instaPago.getSequence());
 					vPosLine.setRefValue(instaPago.getReference());
 					vPosLine.setCardValue(instaPago.getCardnumber());
+					vPosLine.setTenderType(tenderType);
 					if (bni_id!=null)
 						vPosLine.setBSCA_BINBank_ID(bni_id);
 					vPosLine.setAD_Org_ID(org_ID);
@@ -221,6 +230,52 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 		
 	}
 	
+	private String getPosTenderType(String cardline, String cardtype) {
+		
+		String carLineValue = getValueList(CarLineColumn_ID, cardline);
+		String carTypeValue = getValueList(CarTypeColumn_ID, cardtype);	
+		return s_cache.get(carLineValue+"_"+carTypeValue);
+	}
+	
+	protected void loadPaymentVPOSConfig() {
+
+		String sql = "select tendertype , cardline , cardtype from paymentvpos_setup ps where isactive  = 'Y'";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try{
+			pstmt = DB.prepareStatement (sql, null);
+			rs = pstmt.executeQuery ();
+			while (rs.next ()) {
+				String V  = rs.getString("tendertype");
+				String K = rs.getString("cardline")+"_"+rs.getString("cardtype");
+				s_cache.put(K, V);
+			}
+		}
+		catch (SQLException ex){
+			ex.printStackTrace();
+		}
+		finally{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+		
+	}
+	private String getValueList(int AD_Column_ID, String name) {
+		String value = s_cache.get(AD_Column_ID+"_"+name);
+		if (value!=null)
+			return value; 
+		
+		String sql = "select value from ad_ref_list rl\n"
+				+ "join ad_column ac on ac.AD_Reference_Value_ID  = rl.ad_reference_id \n"
+				+ "where ac.ad_column_id ="+AD_Column_ID+" and rl.name = '"+name+"'";
+		value =  DB.getSQLValueStringEx(get_TrxName(), sql);
+		if (value!=null) {
+			s_cache.put(AD_Column_ID+"_"+name, value);
+		}
+		return value; 
+	}
+
 	private int getBSCA_Route_IDForVPOS(Timestamp dateTrx, int org_ID, String host) {
  
 		int c_bankaccount_id = getC_BankAccount_ID(host, org_ID);
@@ -236,8 +291,23 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 	private Integer getCodeBNI(String cardNumber) {
 		if (cardNumber==null || cardNumber.isEmpty())
 			return null;
+		
 		String bni = cardNumber.substring(0, 6);
-		return DB.getSQLValueEx(trxName, "select BSCA_BINBank_ID from BSCA_BINBank where value = '"+bni+"' and isActive = 'Y'");
+		int BSCA_BINBank_ID =  DB.getSQLValueEx(trxName, "select BSCA_BINBank_ID from BSCA_BINBank where value = '"+bni+"' and isActive = 'Y'");
+		if (BSCA_BINBank_ID<=0) {
+			String sql = "Select C_Bank_ID from C_Bank where RoutingNo = '9999' and isActive = 'Y'";
+			int C_Bank_ID = DB.getSQLValueEx(get_TrxName(), sql);
+			if (C_Bank_ID<=0) {
+				X_BSCA_BINBank binbank = new X_BSCA_BINBank(getCtx(), 0, get_TrxName());
+				binbank.setC_Bank_ID(C_Bank_ID);
+				binbank.setValue(bni);
+				binbank.saveEx();
+				
+				
+				return binbank.get_ID();
+			}
+		}
+		return BSCA_BINBank_ID;
 	}
 	private int getC_Bank_ID (String bankValue) {
 		if (bankValue==null || bankValue.isEmpty())
@@ -882,12 +952,13 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 								BigDecimal PayAmt =  n_monto2.setScale(priceList.getPricePrecision(), RoundingMode.HALF_UP);
 								BigDecimal MultiplyRate = new BigDecimal(payment.getMultiplyrate());
 								int C_POSTenderType_ID = Integer.parseInt(payment.getBsca_postendertype_id());
-								X_C_POSTenderType tenderType = new X_C_POSTenderType(getCtx(),C_POSTenderType_ID,trxName );
+								
 								BigDecimal BSCA_QtyCurrency = Env.ZERO;
 								if  (MultiplyRate!=null || !Env.ZERO.equals(MultiplyRate))
 									BSCA_QtyCurrency = PayAmt.divide(MultiplyRate,2,RoundingMode.HALF_UP);
 																				
-								if (tenderType!=null){
+								if (C_POSTenderType_ID>0){
+									X_C_POSTenderType tenderType = new X_C_POSTenderType(getCtx(),C_POSTenderType_ID,trxName );
 									X_C_POSPayment posPayment = new X_C_POSPayment(getCtx(), 0, trxName);
 									posPayment.setC_POSTenderType_ID(tenderType.get_ID());
 									posPayment.setTenderType(tenderType.getTenderType());

@@ -24,6 +24,7 @@ public class BSCA_ImportAllSales extends BSCA_ImportSummarySales{
 				p_AD_Org_ID = para[i].getParameterAsInt();
 			}
 		}
+		loadPaymentVPOSConfig();
 	}
 	
 	private void loadParametersOrg(int AD_Org_ID){
