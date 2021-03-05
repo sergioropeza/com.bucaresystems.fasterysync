@@ -303,7 +303,6 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 				binbank.setValue(bni);
 				binbank.saveEx();
 				
-				
 				return binbank.get_ID();
 			}
 		}

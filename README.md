@@ -23,6 +23,7 @@ This project synchronize idempiere with Fastery Caja
     - Tickets
     - TicketLines
     - Closedcash
+    - BSCA_paymentinstapago
  
 #### Symmetricds Instalation and Setup
 

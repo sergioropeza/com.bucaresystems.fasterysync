@@ -14,6 +14,8 @@ public class Postendertype{
 	protected Object isallowchange;
 	protected Object name;
 	protected Object classname;
+	protected Object amtFrom;
+	private Object amtTo;
 	protected Object node_id;
 	protected String trxName;
 
@@ -72,6 +74,12 @@ public class Postendertype{
 	public void setClassname(Object classname) {
 		this.classname = classname;
 	}
+	protected Object getAmtTo() {
+		return amtTo;
+	}
+	protected void setAmtTo(Object amtTo) {
+		this.amtTo = amtTo;
+	}
 	public Object getNode_id() {
 		return node_id;
 	}
@@ -81,7 +89,7 @@ public class Postendertype{
 	public void save(String whereClause) {
 
 		String sql ="Insert Into "+Table_Name+" (idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id)"+
-		"(Select idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id from "+View_Name+" where 1=1 "+whereClause+")";
+		"(Select idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,amtFrom,amtTo,node_id from "+View_Name+" where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -95,6 +103,8 @@ public class Postendertype{
 		"isallowchange= b.isallowchange,"+
 		"name= b.name,"+
 		"classname= b.classname,"+
+		"amtFrom= b.amtFrom,"+
+		"amtTo= b.amtTo,"+
 		"node_id= b.node_id "+
 		"from "+View_Name+" b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);

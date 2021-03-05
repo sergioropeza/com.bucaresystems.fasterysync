@@ -8,6 +8,8 @@ CREATE TABLE pos.bsca_postendertype (
 	isactive bool NOT NULL DEFAULT true,
 	node_id varchar(25) NULL,
 	idempiere_id numeric NULL,
+	amtto float8 NULL,
+	amtfrom float8 NULL,
 	CONSTRAINT bsca_postendertype_pkey PRIMARY KEY (id),
 	CONSTRAINT bsca_postendertype_fk FOREIGN KEY (bsca_currency_id) REFERENCES pos.bsca_currency(id)
 );

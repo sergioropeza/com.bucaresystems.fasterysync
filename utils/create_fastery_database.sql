@@ -8,4 +8,13 @@ ALTER ROLE pos SET search_path TO pos, pg_catalog;
 CREATE SCHEMA symmetricds AUTHORIZATION symmetricds;
 ALTER ROLE symmetricds SET search_path TO symmetricds, pg_catalog;
 
-# PORT POSTGRESSQL 5482
+--Create on Store 
+
+ALTER TABLE pos.payments DROP CONSTRAINT payments_fk_receipt;
+ALTER TABLE pos.ticketlines DROP CONSTRAINT ticketlines_fk_ticket;
+ALTER TABLE pos.tickets DROP CONSTRAINT tickets_customers_fk;
+ALTER TABLE pos.tickets DROP CONSTRAINT tickets_fk_2;
+ALTER TABLE pos.tickets DROP CONSTRAINT tickets_fk_id;
+ALTER TABLE pos.taxes DROP CONSTRAINT taxes_cat_fk;
+ALTER TABLE pos.products DROP CONSTRAINT products_taxcat_fk;
+

@@ -96,6 +96,10 @@ from symmetricds.sym_outgoing_batch order by batch_id  desc limit 100
 				join pos.receipts r on r.id = t.id 
 				where t.tickettype  = 1 and r.money = closedcash.money) as totalrefunf				
  from pos.closedcash  where host = '01' and orgvalue = 'B03';
+ 
+ --Actualizar accesos a pos.rol desde base de datos
+ 
+    update pos.roles set permissions  = decode(BSCA_PERMISSIONS, 'escape') where id = '0'
   
   
   
