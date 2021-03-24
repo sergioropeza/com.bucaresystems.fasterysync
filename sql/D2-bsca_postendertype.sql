@@ -10,6 +10,7 @@ CREATE TABLE pos.bsca_postendertype (
 	idempiere_id numeric NULL,
 	amtto float8 NULL,
 	amtfrom float8 NULL,
+	movementType varchar(2) NULL,
 	CONSTRAINT bsca_postendertype_pkey PRIMARY KEY (id),
 	CONSTRAINT bsca_postendertype_fk FOREIGN KEY (bsca_currency_id) REFERENCES pos.bsca_currency(id)
 );

@@ -1,7 +1,8 @@
  march 2021:
- - New field amtFrom, amtTo on C_posTenderType.
+ - New field amtFrom, amtTo,movementtype on C_posTenderType.
  - update model pos Postendertype.java.
  - update script sql bsca_postenderType.sql and V_bsca_postenderType.sql 
  - update table pos.bsca_postendertype:
-   	ALTER TABLE bsca_postendertype ADD amtfrom double precision NULL;
-	ALTER TABLE bsca_postendertype ADD amtto double precision NULL;
+  	ALTER TABLE pos.bsca_postendertype ADD amtfrom double precision NULL;
+	ALTER TABLE pos.bsca_postendertype ADD amtto double precision NULL;
+	ALTER TABLE pos.bsca_postendertype ADD movementtype varchar(2) NULL;

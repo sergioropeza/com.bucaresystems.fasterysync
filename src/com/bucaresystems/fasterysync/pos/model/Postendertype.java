@@ -15,7 +15,8 @@ public class Postendertype{
 	protected Object name;
 	protected Object classname;
 	protected Object amtFrom;
-	private Object amtTo;
+	protected Object amtTo;
+	private Object movementType;
 	protected Object node_id;
 	protected String trxName;
 
@@ -80,6 +81,14 @@ public class Postendertype{
 	protected void setAmtTo(Object amtTo) {
 		this.amtTo = amtTo;
 	}
+	
+	protected Object getMovementType() {
+		return movementType;
+	}
+	protected void setMovementType(Object movementType) {
+		this.movementType = movementType;
+	}
+	
 	public Object getNode_id() {
 		return node_id;
 	}
@@ -88,8 +97,8 @@ public class Postendertype{
 	}
 	public void save(String whereClause) {
 
-		String sql ="Insert Into "+Table_Name+" (idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,node_id)"+
-		"(Select idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,amtFrom,amtTo,node_id from "+View_Name+" where 1=1 "+whereClause+")";
+		String sql ="Insert Into "+Table_Name+" (idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,amtFrom,amtTo,movementType,node_id)"+
+		"(Select idempiere_id,issetdifference,isactive,id,bsca_currency_id,isallowchange,name,classname,amtFrom,amtTo,movementType,node_id from "+View_Name+" where 1=1 "+whereClause+")";
 		DB.executeUpdateEx(sql, trxName);
 	};
 	public void update(String whereClause) {
@@ -105,6 +114,7 @@ public class Postendertype{
 		"classname= b.classname,"+
 		"amtFrom= b.amtFrom,"+
 		"amtTo= b.amtTo,"+
+		"movementType = b.movementType,"+
 		"node_id= b.node_id "+
 		"from "+View_Name+" b where  a.id = cast(b.ID as text)  "+whereClause;
 		DB.executeUpdateEx(sql, trxName);
@@ -123,4 +133,5 @@ public class Postendertype{
 			update("and b.idempiere_ID = "+idempiere_id);
 		}
 	}
+
 };

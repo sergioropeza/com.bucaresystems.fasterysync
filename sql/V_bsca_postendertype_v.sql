@@ -17,6 +17,7 @@ AS SELECT p.c_postendertype_id AS id,
     p.classname,
     p.amtfrom,
     p.amtTo,
+    p.movementType,
     NULL::text AS node_id,
     p.c_postendertype_id AS idempiere_id
    FROM c_postendertype p;

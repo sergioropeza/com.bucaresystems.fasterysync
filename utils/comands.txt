@@ -2,7 +2,7 @@
 	bin/symadmin uninstall --engine corp-000
 	
 - Create symmetricds table on data base
-	bin/symadmin  --engine corp create-sym-tables
+	bin/symadmin  --engine corp-000 create-sym-tables
 
 - Run conf. script on data base 
 	bin/dbimport --engine corp $DIR_PLUGIN/com.bucaresystems.fasterysync/symmetricds-conf/conf.sql
@@ -34,7 +34,7 @@
    select * from symmetricds.sym_data where data_id in
    (select data_id from symmetricds.sym_data_event where batch_id='4512');
   
-   select * from sym_data where data_id in
+   select * frou sym_data where data_id in
     (select failed_data_id from sym_outgoing_batch where batch_id='34');
     
     select batch_id , node_id ,channel_id,status, sql_message, last_update_time  
