@@ -33,7 +33,7 @@ This project synchronize idempiere with Fastery Caja
 ```bash
 bin/sym
 ```
-- For more information [https://www.symmetricds.org/doc/3.10/html/user-guide.html#_installation]
+- For more information[symmetricds doc]  (https://www.symmetricds.org/doc/3.10/html/user-guide.html#_installation)
 - Run script symmetricds-conf/conf.sql on data base idempiere 
  
 #### New idempiere windows:	
