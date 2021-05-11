@@ -22,7 +22,7 @@
 - Into to dabase
    bin/dbsql --engine ENGINE NAME
    Example: 
-   	bin/dbsql --engine workstation-B0203
+   	../bin/dbsql --engine workstation-B0202
    
 
 - Check out data error and fix it. 
@@ -39,8 +39,7 @@
     
     select batch_id , node_id ,channel_id,status, sql_message, last_update_time  
 from symmetricds.sym_outgoing_batch order by batch_id  desc limit 100
-   
-   
+     
    
    delete from symmetricds.sym_data_event where batch_id in (select batch_id from sym_outgoing_batch where status = 'ER');
   update symmetricds.sym_outgoing_batch set status='OK', error_flag = 0 where status= 'ER';

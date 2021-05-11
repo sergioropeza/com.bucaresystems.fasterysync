@@ -3,7 +3,7 @@ Bundle-Category: idempiere-plugin
 Bundle-ManifestVersion: 2
 Bundle-Name: fastery-sync
 Bundle-SymbolicName: com.bucaresystems.fasterysync
-Bundle-Version: 7.1.1.qualifier
+Bundle-Version: 7.1.0.qualifier
 Bundle-Vendor: BUCARE SYSTEM C.A. <http://www.bucaresystems.com>
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.apache.commons.lang3,

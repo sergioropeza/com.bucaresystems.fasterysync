@@ -6,3 +6,6 @@
   	ALTER TABLE pos.bsca_postendertype ADD amtfrom double precision NULL;
 	ALTER TABLE pos.bsca_postendertype ADD amtto double precision NULL;
 	ALTER TABLE pos.bsca_postendertype ADD movementtype varchar(2) NULL;
+
+May 2021:
+  - New QR Code Report
