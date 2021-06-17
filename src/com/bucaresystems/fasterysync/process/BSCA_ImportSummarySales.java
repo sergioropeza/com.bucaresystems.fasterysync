@@ -531,7 +531,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 							}
 						}
 					}
-					createPOSDetaillSummay( closeCash_ID,  orgValue,  ticketType, order,tickets.getDate());
+					createPOSDetaillSummary( closeCash_ID,  orgValue,  ticketType, order,tickets.getDate());
 					MDocType docTarget_ID = (MDocType)order.getC_DocTypeTarget();					
 					
 					if (docTarget_ID.get_ValueAsBoolean("BSCA_IsCompleitOnImport")){
@@ -609,13 +609,13 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 	}
 
 	private void createPOSDetaillNotSummary( String closedcash_ID, String orgValue, int ticketType,MOrder order, Timestamp date){
-		List<BSCA_Tickets> lsttickets = BSCA_Tickets.getTicketsDetaillPaySummary(closedcash_ID, orgValue, ticketType,date);
+		List<BSCA_Tickets> lsttickets = BSCA_Tickets.getTicketsDetaillNotSummary(closedcash_ID, orgValue, ticketType,date);
 		createPOSDetaill(lsttickets,order,ticketType);
 	}
 	
 	
-	private void createPOSDetaillSummay( String closedcash_ID, String orgValue, int ticketType,MOrder order, Timestamp date){
-		List<BSCA_Tickets> lstTickets = BSCA_Tickets.getTicketsDetaillNotPaySummary(closedcash_ID, orgValue, ticketType,date);
+	private void createPOSDetaillSummary( String closedcash_ID, String orgValue, int ticketType,MOrder order, Timestamp date){
+		List<BSCA_Tickets> lstTickets = BSCA_Tickets.getTicketsDetaillSummary(closedcash_ID, orgValue, ticketType,date);
 		createPOSDetaill(lstTickets,order,ticketType);
 		
 	}
@@ -675,6 +675,7 @@ public class BSCA_ImportSummarySales extends CustomProcess{
 				posDetaill.setClientName(c_desc_cliente);
 				posDetaill.setLocationName(cu_direccion_cliente);
 				posDetaill.setBSCA_isTaxPayer(BSCA_isTaxPayer);
+				posDetaill.setticket(id);
 				posDetaill.saveEx();	
 				
 				

@@ -25,14 +25,14 @@ import org.compiere.util.Env;
 
 /** Generated Model for BSCA_POSDetaill
  *  @author iDempiere (generated) 
- *  @version Release 3.1 - $Id$ */
+ *  @version Release 7.1 - $Id$ */
 public class X_BSCA_POSDetaill extends PO implements I_BSCA_POSDetaill, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181005L;
+	private static final long serialVersionUID = 20210617L;
 
     /** Standard Constructor */
     public X_BSCA_POSDetaill (Properties ctx, int BSCA_POSDetaill_ID, String trxName)
@@ -40,9 +40,9 @@ public class X_BSCA_POSDetaill extends PO implements I_BSCA_POSDetaill, I_Persis
       super (ctx, BSCA_POSDetaill_ID, trxName);
       /** if (BSCA_POSDetaill_ID == 0)
         {
+			setBSCA_POSDetaill_ID (0);
 			setBSCA_isTaxPayer (false);
 // N
-			setBSCA_POSDetaill_ID (0);
         } */
     }
 
@@ -74,39 +74,18 @@ public class X_BSCA_POSDetaill extends PO implements I_BSCA_POSDetaill, I_Persis
       return sb.toString();
     }
 
-	/** Set Fiscal DocumentNo.
-		@param BSCA_FiscalDocumentNo Fiscal DocumentNo	  */
+	/** Set Factura POS Fiscal.
+		@param BSCA_FiscalDocumentNo Factura POS Fiscal	  */
 	public void setBSCA_FiscalDocumentNo (String BSCA_FiscalDocumentNo)
 	{
 		set_Value (COLUMNNAME_BSCA_FiscalDocumentNo, BSCA_FiscalDocumentNo);
 	}
 
-	/** Get Fiscal DocumentNo.
-		@return Fiscal DocumentNo	  */
+	/** Get Factura POS Fiscal.
+		@return Factura POS Fiscal	  */
 	public String getBSCA_FiscalDocumentNo () 
 	{
 		return (String)get_Value(COLUMNNAME_BSCA_FiscalDocumentNo);
-	}
-
-	/** Set Tax Payer.
-		@param BSCA_isTaxPayer Tax Payer	  */
-	public void setBSCA_isTaxPayer (boolean BSCA_isTaxPayer)
-	{
-		set_Value (COLUMNNAME_BSCA_isTaxPayer, Boolean.valueOf(BSCA_isTaxPayer));
-	}
-
-	/** Get Tax Payer.
-		@return Tax Payer	  */
-	public boolean isBSCA_isTaxPayer () 
-	{
-		Object oo = get_Value(COLUMNNAME_BSCA_isTaxPayer);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
 	}
 
 	/** Set POS Detaill.
@@ -185,18 +164,25 @@ public class X_BSCA_POSDetaill extends PO implements I_BSCA_POSDetaill, I_Persis
 		return (String)get_Value(COLUMNNAME_BSCA_StellarRif);
 	}
 
-	/** Set Client Name.
-		@param ClientName Client Name	  */
-	public void setClientName (String ClientName)
+	/** Set Tax Payer.
+		@param BSCA_isTaxPayer Tax Payer	  */
+	public void setBSCA_isTaxPayer (boolean BSCA_isTaxPayer)
 	{
-		set_ValueNoCheck (COLUMNNAME_ClientName, ClientName);
+		set_Value (COLUMNNAME_BSCA_isTaxPayer, Boolean.valueOf(BSCA_isTaxPayer));
 	}
 
-	/** Get Client Name.
-		@return Client Name	  */
-	public String getClientName () 
+	/** Get Tax Payer.
+		@return Tax Payer	  */
+	public boolean isBSCA_isTaxPayer () 
 	{
-		return (String)get_Value(COLUMNNAME_ClientName);
+		Object oo = get_Value(COLUMNNAME_BSCA_isTaxPayer);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
@@ -225,6 +211,20 @@ public class X_BSCA_POSDetaill extends PO implements I_BSCA_POSDetaill, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Client Name.
+		@param ClientName Client Name	  */
+	public void setClientName (String ClientName)
+	{
+		set_ValueNoCheck (COLUMNNAME_ClientName, ClientName);
+	}
+
+	/** Get Client Name.
+		@return Client Name	  */
+	public String getClientName () 
+	{
+		return (String)get_Value(COLUMNNAME_ClientName);
 	}
 
 	/** Set Description.
@@ -324,5 +324,19 @@ public class X_BSCA_POSDetaill extends PO implements I_BSCA_POSDetaill, I_Persis
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set ticket.
+		@param ticket ticket	  */
+	public void setticket (String ticket)
+	{
+		set_ValueNoCheck (COLUMNNAME_ticket, ticket);
+	}
+
+	/** Get ticket.
+		@return ticket	  */
+	public String getticket () 
+	{
+		return (String)get_Value(COLUMNNAME_ticket);
 	}
 }

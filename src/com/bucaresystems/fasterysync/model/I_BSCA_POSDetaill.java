@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for BSCA_POSDetaill
  *  @author iDempiere (generated) 
- *  @version Release 3.1
+ *  @version Release 7.1
  */
 @SuppressWarnings("all")
 public interface I_BSCA_POSDetaill 
@@ -32,7 +32,7 @@ public interface I_BSCA_POSDetaill
     /** TableName=BSCA_POSDetaill */
     public static final String Table_Name = "BSCA_POSDetaill";
 
-    /** AD_Table_ID=1000477 */
+    /** AD_Table_ID=1000497 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -67,20 +67,11 @@ public interface I_BSCA_POSDetaill
     /** Column name BSCA_FiscalDocumentNo */
     public static final String COLUMNNAME_BSCA_FiscalDocumentNo = "BSCA_FiscalDocumentNo";
 
-	/** Set Fiscal DocumentNo	  */
+	/** Set Factura POS Fiscal	  */
 	public void setBSCA_FiscalDocumentNo (String BSCA_FiscalDocumentNo);
 
-	/** Get Fiscal DocumentNo	  */
+	/** Get Factura POS Fiscal	  */
 	public String getBSCA_FiscalDocumentNo();
-
-    /** Column name BSCA_isTaxPayer */
-    public static final String COLUMNNAME_BSCA_isTaxPayer = "BSCA_isTaxPayer";
-
-	/** Set Tax Payer	  */
-	public void setBSCA_isTaxPayer (boolean BSCA_isTaxPayer);
-
-	/** Get Tax Payer	  */
-	public boolean isBSCA_isTaxPayer();
 
     /** Column name BSCA_POSDetaill_ID */
     public static final String COLUMNNAME_BSCA_POSDetaill_ID = "BSCA_POSDetaill_ID";
@@ -127,14 +118,14 @@ public interface I_BSCA_POSDetaill
 	/** Get Stellar Rif	  */
 	public String getBSCA_StellarRif();
 
-    /** Column name ClientName */
-    public static final String COLUMNNAME_ClientName = "ClientName";
+    /** Column name BSCA_isTaxPayer */
+    public static final String COLUMNNAME_BSCA_isTaxPayer = "BSCA_isTaxPayer";
 
-	/** Set Client Name	  */
-	public void setClientName (String ClientName);
+	/** Set Tax Payer	  */
+	public void setBSCA_isTaxPayer (boolean BSCA_isTaxPayer);
 
-	/** Get Client Name	  */
-	public String getClientName();
+	/** Get Tax Payer	  */
+	public boolean isBSCA_isTaxPayer();
 
     /** Column name C_Order_ID */
     public static final String COLUMNNAME_C_Order_ID = "C_Order_ID";
@@ -150,6 +141,15 @@ public interface I_BSCA_POSDetaill
 	public int getC_Order_ID();
 
 	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException;
+
+    /** Column name ClientName */
+    public static final String COLUMNNAME_ClientName = "ClientName";
+
+	/** Set Client Name	  */
+	public void setClientName (String ClientName);
+
+	/** Get Client Name	  */
+	public String getClientName();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -261,4 +261,13 @@ public interface I_BSCA_POSDetaill
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name ticket */
+    public static final String COLUMNNAME_ticket = "ticket";
+
+	/** Set ticket	  */
+	public void setticket (String ticket);
+
+	/** Get ticket	  */
+	public String getticket();
 }

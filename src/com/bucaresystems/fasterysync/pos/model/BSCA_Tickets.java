@@ -313,7 +313,7 @@ public class BSCA_Tickets {
 		return lst;
 	}
 	
-	public static List<BSCA_Tickets> getTicketsDetaillNotPaySummary(String closedcash_ID, String orgValue, int ticketType, Timestamp dateTicket){
+	public static List<BSCA_Tickets> getTicketsDetaillSummary(String closedcash_ID, String orgValue, int ticketType, Timestamp dateTicket){
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
 		
@@ -368,7 +368,7 @@ public class BSCA_Tickets {
 		return lstMA_Pagos;
 	}
 	
-	public static List<BSCA_Tickets> getTicketsDetaillPaySummary(String closedcash_ID, String orgValue, int ticketType, Timestamp dateTicket){
+	public static List<BSCA_Tickets> getTicketsDetaillNotSummary(String closedcash_ID, String orgValue, int ticketType, Timestamp dateTicket){
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
 		
@@ -382,7 +382,12 @@ public class BSCA_Tickets {
 				" where\n" + 
 				" r.money = '"+closedcash_ID+"' and \n" + 
 				" r.bsca_isimported = false and r.orgvalue  = '"+orgValue+"' \n" + 
-				" and t.tickettype = "+ticketType + " and date_trunc('day', r.datenew) = '"+dateTicket+"'";
+				" and t.tickettype = "+ticketType + " and date_trunc('day', r.datenew) = '"+dateTicket+"'"	
+				+ " and t.id  in (select t.id from pos.tickets t \n" + 
+						" join pos.receipts r on t.id = r.id \n" + 
+						" join pos.payments p on p.receipt  = t.id \n" + 
+						" JOIN C_POSTenderType pt ON pt.c_postendertype_id = p.bsca_postendertype_id::numeric \n" + 
+						" where r.bsca_isimported  = false and r.orgvalue  ='"+orgValue+"' and pt.BSCA_IsNotPaySummary = 'Y')\n";
 		
 		pstmt = DB.prepareStatement(sql, null);
 		try {
