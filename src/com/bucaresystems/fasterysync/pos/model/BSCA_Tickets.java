@@ -382,7 +382,7 @@ public class BSCA_Tickets {
 				" where\n" + 
 				" r.money = '"+closedcash_ID+"' and \n" + 
 				" r.bsca_isimported = false and r.orgvalue  = '"+orgValue+"' \n" + 
-				" and t.tickettype = "+ticketType + " and date_trunc('day', r.datenew) = '"+dateTicket+"'"	
+				" and t.tickettype = "+ticketType + " and r.datenew = '"+dateTicket+"'"	
 				+ " and t.id  in (select t.id from pos.tickets t \n" + 
 						" join pos.receipts r on t.id = r.id \n" + 
 						" join pos.payments p on p.receipt  = t.id \n" + 
